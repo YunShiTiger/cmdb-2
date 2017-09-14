@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     'alert',
     'users',
     'config_center',
+    'route',
 ]
 
 MIDDLEWARE_CLASSES = [

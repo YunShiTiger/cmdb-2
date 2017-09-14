@@ -19,7 +19,7 @@ from cmdb.views import index
 from web.views import login,logout
 
 
-import asset,logs,winservices,cache,www,subversion,kettle,workflow,users
+import asset,logs,winservices,cache,www,subversion,kettle,workflow,users,route
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
@@ -37,4 +37,6 @@ urlpatterns = [
     url(r'^alert/', include('alert.urls')),
     url(r'^users/', include('users.urls')),
     url(r'^configcenter/', include('config_center.urls')),
+    url(r'^route/', include('route.urls')),
+
 ]
