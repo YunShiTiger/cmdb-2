@@ -1,7 +1,7 @@
 # coding: utf-8
 
 from django.db import models
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User,Group
 
 CHOICE_ENV = (
     (0, U'禁用'),
@@ -30,4 +30,9 @@ class UserRoutingInfo(models.Model):
 
     def __unicode__(self):
         return self.username
+
+class GroupRoutingInfo(models.Model):
+    groupname = models.OneToOneField(Group)
+    routing_info = models.TextField()
+
 
