@@ -7,6 +7,7 @@ from salt.client import LocalClient
 import os,commands,re,json
 from asset.utils import getNowTime,get_cronjob_list
 from django.core.paginator import Paginator,EmptyPage,PageNotAnInteger
+from mico.settings import consul_location
 
 
 
@@ -328,3 +329,8 @@ def go_template_result(request):
     Publish = goPublish(env)
     mes = Publish.go_template(project,username,ip,request.POST['phone_number'])
     return render(request,'getdata.html',{'result':mes})
+
+@login_required
+def get_consul_html(request):
+    return render(request,'consul.html',{'location':consul_location})
+
