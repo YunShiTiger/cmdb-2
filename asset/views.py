@@ -334,3 +334,12 @@ def go_template_result(request):
 def get_consul_html(request):
     return render(request,'consul.html',{'location':consul_location})
 
+@login_required
+def get_consul_info(request):
+    location = request.GET['location']
+    query_type = request.GET['type']
+    query_data = request.GET['queryName']
+    print query_type,location,query_data
+    result = get_consul(location,query_type,query_data)
+    return HttpResponse(json.dumps(result))
+

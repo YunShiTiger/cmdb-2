@@ -9,9 +9,10 @@ from logs.models import goLog,publishLog
 from celery.task import task
 import xmlrpclib
 from salt_api.api import SaltApi
-from mico.settings import dingding_api,crontab_api,dingding_robo_url
+from mico.settings import dingding_api,crontab_api,dingding_robo_url,consul_location
 from functools import wraps
 from django.contrib.auth.models import User
+import consul
 
 salt_api = SaltApi()
 
@@ -594,3 +595,12 @@ def dingding_robo(hostname='',project='',result='',username='',phone_number='',t
         requests.post(url,headers=headers,data=json.dumps(data),timeout=3)
     except Exception,e:
         print e
+
+
+def get_consul(location,query_type,query_data):
+    consul_host = consul_location[location]
+    c = consul.Consul(consul_host)
+    if query_type == "2":
+        result = c.health.service(query_data)[1]
+        print result
+    return result

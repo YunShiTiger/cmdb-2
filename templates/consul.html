@@ -4,11 +4,11 @@
 
 
 <div class="text-center">
-<form  class="col-lg-12" action="#" method="get" id="submitform">
+<form  class="col-lg-12" action="{% url 'get_consul_info' %}" method="get" id="submitform">
 
  <fieldset class="form-group">
     <label for="formGroupExampleInput">查询类型</label>
-    <select id="env" class="selectpicker form-control" data-live-search="true" name="env">
+    <select id="type" class="selectpicker form-control" data-live-search="true" name="type">
       <option value="1">consul kv</option>
       <option value="2">consul service</option>
     </select>
@@ -26,13 +26,13 @@
 
 
  <fieldset class="form-group">
-    <label for="formGroupExampleInput">consul name</label>
-    <input type="text" class="form-control" id="consulName" placeholder="请输入你需要查询的名称" name="consulName" required="" >
+    <label for="formGroupExampleInput">query name</label>
+    <input type="text" class="form-control" id="queryName" placeholder="请输入你需要查询的名称" name="queryName" required="" >
   </fieldset>
 
   <fieldset class="form-group">
-    <label for="formGroupExampleInput2">Re-enter consul name</label>
-    <input type="text" class="form-control" id="consulNameAgain" placeholder="请再次确认你需要查询的名称" name="consulNameAgain" required="" >
+    <label for="formGroupExampleInput2">Re-enter query name</label>
+    <input type="text" class="form-control" id="queryNameAgain" placeholder="请再次确认你需要查询的名称" name="queryNameAgain" required="" >
   </fieldset>
 
     <input  id="sub" class="btn btn-danger" type="submit" value="Deploy">
@@ -41,9 +41,9 @@
 
 <script>
     $("#submitform").on("submit",function(e){
-        var consulName = document.getElementById("consulName").value;
-        var consulNameAgain = document.getElementById("consulNameAgain").value;
-        if (consulName != consulNameAgain) {
+        var querylName = document.getElementById("queryName").value;
+        var queryNameAgain = document.getElementById("queryNameAgain").value;
+        if (querylName != queryNameAgain) {
             alert('Please enter the correct name,try again....')
             return false
         }

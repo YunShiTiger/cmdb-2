@@ -28,4 +28,5 @@ urlpatterns = patterns('',
     url(r'^go_template_result/$', go_template_result, name='go_template_result'),
     url(r'^get_go_revert_list/$', get_go_revert_list, name='get_go_revert_list'),
     url(r'^get_consul_html/$', get_consul_html, name='get_consul_html'),
+    url(r'^get_consul_info/$', get_consul_info, name='get_consul_info'),
 )
