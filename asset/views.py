@@ -7,7 +7,7 @@ from salt.client import LocalClient
 import os,commands,re,json
 from asset.utils import getNowTime,get_cronjob_list
 from django.core.paginator import Paginator,EmptyPage,PageNotAnInteger
-
+from asset.forms import IdcForm
 
 
 
@@ -17,14 +17,37 @@ def asset_list(request):
     asset_list = Asset.objects.all().order_by('hostname')
     return render(request,'asset/asset_list.html',{'asset_list':asset_list})
 
+@login_required
+def asset_idc(request):
+    return render(request,'asset/idc_list.html')
+
+@login_required
+def idc_add(request):
+    """
+    IDC add view
+    """
+    header_title, path1, path2 = u'IDC', u'asset', u'add IDC'
+    if request.method == 'POST':
+        idc_form = IdcForm(request.POST)
+        if idc_form.is_valid():
+            idc_name = idc_form.cleaned_data['name']
+
+            if IDC.objects.filter(name=idc_name):
+                emg = u'error, IDC %s is exists.' % idc_name
+                return render('asset/idc_add.html', locals(), request)
+            else:
+                idc_form.save()
+                smg = u'IDC: %ssuccessful.' % idc_name
+            return HttpResponseRedirect('/')
+    else:
+        idc_form = IdcForm()
+    return render('asset/idc_add.html', locals(), request)
 
 @login_required
 @deny_resubmit(page_key='deploy_go')
 def get(request):
     groupname = gogroup.objects.all()
     return render(request,'get.html',{'groupname':groupname})
-
-
 
 @login_required
 @deny_resubmit(page_key='deploy_go')

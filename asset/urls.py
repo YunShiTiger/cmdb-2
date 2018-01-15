@@ -4,6 +4,8 @@ from asset.views import *
 
 urlpatterns = patterns('',
     url(r'^list/$', asset_list, name='asset_list'),
+    url(r'^idc_list/$', asset_idc, name='asset_idc'),
+    url(r'^idc_add/$', idc_add, name='idc_add'),
     url(r'^get/$', get, name='get'),
     url(r'^goServices/$', goServices, name='goServices'),
     url(r'^getData/$', getData, name='getData'),
