@@ -1,0 +1,117 @@
+<div class="col-lg-4">
+    <div class="ibox">
+        <div class="ibox-content">
+            <div class="text-center">
+                <h3>发布完成</h3>
+                <p class="small"><i class="fa fa-check-square-o"></i> 已完成，请检查是否发布成功</p>
+            </div>
+
+            <ul class="sortable-list connectList agile-list ui-sortable" id="publish_done">
+                {% for sheet in done_list %}
+                    <li class="success-element">
+                        <i class="fa fa-clock-o"></i> {{ sheet.publish_date }} {{ sheet.publish_time }}<br>
+                        创建人：{{ sheet.creator }}<br>
+                        项目：{{ sheet.gogroup }}<br>
+                        环境：{{ sheet.env }}<br>
+                        重启服务：{{ sheet.services_str }}<br>
+
+                        {% if sheet.approve_level == '1' %}
+                            审批级别：<span>{{ sheet.level }}</span><br>
+                        {% elif sheet.approve_level == '2' %}
+                            审批级别：<span style="color: #0e9aef">{{ sheet.level }}</span><br>
+                            一级审批人：<span>{{ sheet.first_str }}</span><br>
+                        {% elif sheet.approve_level == '3' %}
+                            审批级别：<span style="color: orange">{{ sheet.level }}</span><br>
+                            一级审批人：<span>{{ sheet.first_str }}</span><br>
+                            二级审批人：<span>{{ sheet.second_str }}</span><br>
+                        {% endif %}
+
+                        TAPD URL：{{ sheet.tapd_url }}<br>
+                        SQL：{{ sheet.sql }}<br>
+                        CONSUL KEY：{{ sheet.consul_key }}
+                    </li>
+                {% endfor %}
+
+            </ul>
+        </div>
+    </div>
+</div>
+
+<div class="col-lg-4">
+    <div class="ibox">
+        <div class="ibox-content">
+            <div class="text-center">
+                <h3>超时未审批</h3>
+                <p class="small" style="color: darkorange"><i class="fa fa-warning"></i> 未在发布时间点前审批</p>
+            </div>
+            <ul class="sortable-list connectList agile-list ui-sortable"
+                id="approve_passed">
+                {% for sheet in outtime_notapprove_list %}
+                    <li class="warning-element">
+                        <i class="fa fa-clock-o"></i> {{ sheet.publish_date }} {{ sheet.publish_time }}<br>
+                        创建人：{{ sheet.creator }}<br>
+                        项目：{{ sheet.gogroup }}<br>
+                        环境：{{ sheet.env }}<br>
+                        重启服务：{{ sheet.services_str }}<br>
+
+                        {% if sheet.approve_level == '1' %}
+                            审批级别：<span>{{ sheet.level }}</span><br>
+                        {% elif sheet.approve_level == '2' %}
+                            审批级别：<span style="color: #0e9aef">{{ sheet.level }}</span><br>
+                            一级审批人：<span>{{ sheet.first_str }}</span><br>
+                        {% elif sheet.approve_level == '3' %}
+                            审批级别：<span style="color: orange">{{ sheet.level }}</span><br>
+                            一级审批人：<span>{{ sheet.first_str }}</span><br>
+                            二级审批人：<span>{{ sheet.second_str }}</span><br>
+                        {% endif %}
+
+                        TAPD URL：{{ sheet.tapd_url }}<br>
+                        SQL：{{ sheet.sql }}<br>
+                        CONSUL KEY：{{ sheet.consul_key }}
+
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</div>
+
+<div class="col-lg-4">
+    <div class="ibox">
+        <div class="ibox-content">
+            <div class="text-center">
+                <h3>超时未发布</h3>
+                <p class="small" style="color: darkorange"><i class="fa fa-warning"></i> 未在发布时间点按时发布</p>
+            </div>
+            <ul class="sortable-list connectList agile-list ui-sortable"
+                id="approve_passed">
+                {% for sheet in outtime_notpublish_list %}
+                    <li class="warning-element">
+                        <i class="fa fa-clock-o"></i> {{ sheet.publish_date }} {{ sheet.publish_time }}<br>
+                        创建人：{{ sheet.creator }}<br>
+                        项目：{{ sheet.gogroup }}<br>
+                        环境：{{ sheet.env }}<br>
+                        重启服务：{{ sheet.services_str }}<br>
+
+                        {% if sheet.approve_level == '1' %}
+                            审批级别：<span>{{ sheet.level }}</span><br>
+                        {% elif sheet.approve_level == '2' %}
+                            审批级别：<span style="color: #0e9aef">{{ sheet.level }}</span><br>
+                            一级审批人：<span>{{ sheet.first_str }}</span><br>
+                        {% elif sheet.approve_level == '3' %}
+                            审批级别：<span style="color: orange">{{ sheet.level }}</span><br>
+                            一级审批人：<span>{{ sheet.first_str }}</span><br>
+                            二级审批人：<span>{{ sheet.second_str }}</span><br>
+                        {% endif %}
+
+                        TAPD URL：{{ sheet.tapd_url }}<br>
+                        SQL：{{ sheet.sql }}<br>
+                        CONSUL KEY：{{ sheet.consul_key }}
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</div>
+
+<script src="/static/js/custom/publish_done.js"></script>
