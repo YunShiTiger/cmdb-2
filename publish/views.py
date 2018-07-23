@@ -442,11 +442,7 @@ def PublishSheetList(request):
         tmp_dict.update({'id': publish.id, 'gogroup': gogroup_obj.name, 'services_str': services_str, 'env': env,
                              'approve_level': approve_level, 'level': level, 'first_str': first_str, 'second_str': second_str, 'creator': publish.creator.username})
 
-        if user == publish.creator:
-            tmp_dict['can_publish'] = True
-        else:
-            tmp_dict['can_publish'] = False
-
+        tmp_dict['can_publish'] = False
         # 判断是否超时
         publish_datetime_str = publish.publish_date + ' ' + publish.publish_time
         publish_datetime_format = time.strptime(publish_datetime_str, '%Y-%m-%d %H:%M')
@@ -508,6 +504,12 @@ def PublishSheetList(request):
                                     # 超时15分钟之内，可以发布
                                     tmp_dict['can_publish'] = True
                                     approve_passed_list.append(tmp_dict)
+
+            if tmp_dict['can_publish'] and user == publish.creator:
+                tmp_dict['can_publish'] = True
+            else:
+                tmp_dict['can_publish'] = False
+
         else:
             tmp_dict['can_publish'] = False
             if publish.approval_level.name == '1':
