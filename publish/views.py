@@ -776,9 +776,9 @@ def createPublishSheet(request):
             for template_obj in template_objs:
                 start_week_int = int(template_obj.start_of_week)
                 end_week_int = int(template_obj.end_of_week)
-                print 'publish_week : ', publish_week
-                print 'start_week_int : ', start_week_int
-                print 'end_week_int : ', end_week_int
+                # print 'publish_week : ', publish_week
+                # print 'start_week_int : ', start_week_int
+                # print 'end_week_int : ', end_week_int
                 if start_week_int <= publish_week <= end_week_int:
                     publish_time_format = time.strptime(str(publish_date) + ' ' + str(publish_time), '%Y-%m-%d %H:%M')
                     start_time_format = time.strptime(str(publish_date) + ' ' + str(template_obj.start_time),
@@ -790,9 +790,9 @@ def createPublishSheet(request):
                     end_time_int = time.mktime(end_time_format)
                     if end_time_int <= start_time_int:
                         end_time_int = end_time_int + 86400
-                    print 'publish_time_int : ', publish_time_int
-                    print 'start_time_int : ', start_time_int
-                    print 'end_time_int : ', end_time_int
+                    # print 'publish_time_int : ', publish_time_int
+                    # print 'start_time_int : ', start_time_int
+                    # print 'end_time_int : ', end_time_int
                     if start_time_int <= publish_time_int <= end_time_int:
                         print 'template ok : ', template_obj.approval_level.get_name_display()
                         approval_level = template_obj.approval_level
@@ -826,18 +826,18 @@ def createPublishSheet(request):
                                 break
 
         if slot:
-            print 'if'
+            # print 'if slot'
             if approval_level:
-                print 'if approval_level'
+                # print 'if approval_level'
                 if approval_level != init_approval_level:
-                    print 'if !='
+                    # print 'if !='
                     if not reason:
                         errcode = 500
                         msg = u'{0}，请填写紧急发布原因'.format(approval_level.get_name_display())
                         data = dict(code=errcode, msg=msg)
                         return HttpResponse(json.dumps(data), content_type='application/json')
         else:
-            print 'else'
+            # print 'else'
             approval_level = init_approval_level
 
         publishsheet_obj.approval_level = approval_level
