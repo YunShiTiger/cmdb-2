@@ -1,5 +1,6 @@
 function get_reboot_services(project_name, env_id) {
     $('#reboot_services_choice').val(null).trigger('change');
+    $('#reboot_services_choice').empty();
     $('#reboot_services_choice').on("removed", function () {
     });
     let old_obj = document.getElementById('reboot_services_choice');
@@ -16,6 +17,15 @@ function get_reboot_services(project_name, env_id) {
 
 
 function init_tab3() {
+    $("#if_review2").click(function () {
+        $("#review_select").val(null).trigger('change');
+        $("#review_select").prop("disabled", true);
+    });
+
+    $("#if_review1").click(function () {
+        $("#review_select").prop("disabled", false);
+    });
+
     let project_name = $('#project_name').val();
     $('#datepicker').parent().datepicker({
         autoclose: true,
@@ -33,6 +43,15 @@ function init_tab3() {
 
     $('#project_name').select2({
         placeholder: '请选择',
+    });
+
+    $('#qa_select').select2({
+        placeholder: '请选择',
+        allowClear: true
+    });
+    $('#review_select').select2({
+        placeholder: '请选择',
+        allowClear: true
     });
 
     $('#project_name').on("change", function () {
@@ -60,6 +79,7 @@ function init_tab3() {
         width: '100%',
         placeholder: '请选择',
     });
+    $('#reboot_services_choice').val(null).trigger('change');     $('#reboot_services_choice').empty();
 
     let env_id = $('#env_id').val();
     get_reboot_services(project_name, env_id);
@@ -92,7 +112,7 @@ function delete_publishsheet(sheet_id) {
         },
         success: function (result) {
             if (result.code === 0) {
-                $("#" + sheet_id).remove();
+                window.location.reload();
             }
             else {
                 alert(result.msg);
@@ -126,13 +146,30 @@ function sheetRefuseReasonDetail(sheet_id) {
 }
 
 function sheet_detail(sheet_id) {
-    let url = '/asset/publishsheet/detail/?sheet_id=' + sheet_id;
+    // 可以发布的单子
+    let url = '/asset/publishsheet/detail/?sheet_id=' + sheet_id + '&can_publish=1';
     $.ajax({
         url: url,
         type: "GET",
         success: function (result) {
             if (result.length > 0) {
-                $("#sheet_modal").html(result);
+                $("#sheet_detail_modal").html(result);
+            }
+        },
+        error: function () {
+            alert('失败');
+        }
+    });
+}
+
+function publish_sheet_detail(sheet_id, can_delete=2) {
+    let url = '/asset/publishsheet/detail/?sheet_id=' + sheet_id + '&can_publish=2&can_delete=' + can_delete ;
+    $.ajax({
+        url: url,
+        type: "GET",
+        success: function (result) {
+            if (result.length > 0) {
+                $("#sheet_detail_modal").html(result);
             }
         },
         error: function () {

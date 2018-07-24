@@ -4,6 +4,11 @@ from django.db import models
 from django.contrib.auth.models import User
 from asset.models import gogroup, goservices
 
+IF_OR_NOT = (
+    ('1', u'是'),
+    ('2', u'否'),
+)
+
 
 class Festival(models.Model):
     name = models.CharField(max_length=32, verbose_name=u"节日名称")
@@ -54,7 +59,8 @@ class TimeSlotLevel(models.Model):
     start_time = models.CharField(verbose_name=u'开始时间点', max_length=32, blank=True, null=True)
     end_time = models.CharField(verbose_name=u'结束时间点', max_length=32, blank=True, null=True)
     approval_level = models.ForeignKey(ApprovalLevel)
-    creator = models.ForeignKey(User, verbose_name=u"创建者", related_name="creator_of_timeslotlevel", blank=True, null=True)
+    creator = models.ForeignKey(User, verbose_name=u"创建者", related_name="creator_of_timeslotlevel", blank=True,
+                                null=True)
 
     def __unicode__(self):
         return self.start_of_week + ' ' + self.end_of_week + ' ' + self.start_time + ' ' + self.end_time + ' ' + self.approval_level.get_name_display()
@@ -82,7 +88,8 @@ class ProjectInfo(models.Model):
     mail_group = models.ManyToManyField(MailGroup, verbose_name=u'邮件组', related_name='project_mail_group')
     first_approver = models.ManyToManyField(User, verbose_name=u'一级审批人', related_name='project_first_level_approver')
     second_approver = models.ManyToManyField(User, verbose_name=u'二级审批人', related_name='project_second_level_approver')
-    timeslot_level = models.ManyToManyField(TimeSlotLevel, verbose_name=u'时间段-审批级别', related_name='project_timeslotlevel')
+    timeslot_level = models.ManyToManyField(TimeSlotLevel, verbose_name=u'时间段-审批级别',
+                                            related_name='project_timeslotlevel')
     creator = models.ForeignKey(User, verbose_name=u"创建者", related_name="creator_of_projectinfo", null=True, blank=True)
 
     def __unicode__(self):
@@ -106,13 +113,24 @@ class PublishSheet(models.Model):
     goservices = models.ManyToManyField(goservices, verbose_name=u'重启服务', related_name='publish_goservices')
     publish_date = models.CharField(max_length=32, verbose_name=u"发布日期")
     publish_time = models.CharField(max_length=32, verbose_name=u"发布开始时间")
-    tapd_url = models.CharField(max_length=256, verbose_name=u"TAPD URL")
-    sql = models.TextField(verbose_name=u"执行SQL", blank=True, null=True)
+    tapd_url = models.TextField(verbose_name=u"TAPD URL")
+    sql_before = models.TextField(verbose_name=u"事前执行的SQL", blank=True, null=True)
+    sql_after = models.TextField(verbose_name=u"事后执行的SQL", blank=True, null=True)
     consul_key = models.TextField(verbose_name=u"consul key", blank=True, null=True)
     status = models.CharField(choices=STATUS, max_length=32, verbose_name=u"发布单状态", default='1')
     approval_level = models.ForeignKey(ApprovalLevel, blank=True, null=True)
-    first_approver = models.ManyToManyField(User, verbose_name=u'一级审批人', related_name='publishsheet_first_level_approver')
-    second_approver = models.ManyToManyField(User, verbose_name=u'二级审批人', related_name='publishsheet_second_level_approver')
+    first_approver = models.ManyToManyField(User, verbose_name=u'一级审批人',
+                                            related_name='publishsheet_first_level_approver')
+    second_approver = models.ManyToManyField(User, verbose_name=u'二级审批人',
+                                             related_name='publishsheet_second_level_approver')
+    comment = models.TextField(verbose_name=u"备注", blank=True, null=True)
+    qa = models.ManyToManyField(User, verbose_name=u'测试人', related_name='publishsheet_qa')
+    reason = models.TextField(verbose_name=u"紧急发布原因", blank=True, null=True)
+    if_review = models.CharField(choices=IF_OR_NOT, max_length=32, verbose_name=u"是否code review", default='2')
+    reviewer = models.ManyToManyField(User, verbose_name=u'code review人', related_name='publishsheet_reviewer')
+    if_browse = models.CharField(choices=IF_OR_NOT, max_length=32, verbose_name=u"是否影响用户浏览", default='2')
+    if_order = models.CharField(choices=IF_OR_NOT, max_length=32, verbose_name=u"是否影响订单流程", default='2')
+    if_buy = models.CharField(choices=IF_OR_NOT, max_length=32, verbose_name=u"是否影响履单流程", default='2')
 
     def __unicode__(self):
         return self.tapd_url
@@ -135,11 +153,14 @@ class PublishApprovalHistory(models.Model):
     approve_count = models.CharField(choices=APPROVE_COUNT, max_length=32, verbose_name=u"审批次数", default='1')
     approve_status = models.CharField(choices=APPROVE_STATUS, max_length=32, verbose_name=u"审批状态", default='1')
     refuse_reason = models.TextField(verbose_name=u"拒绝原因", blank=True, null=True)
-    first_approver = models.ForeignKey(User, verbose_name=u'第一审批人', related_name='sheet_first_approver', blank=True, null=True)
+    first_approver = models.ForeignKey(User, verbose_name=u'第一审批人', related_name='sheet_first_approver', blank=True,
+                                       null=True)
     first_approve_time = models.DateTimeField(verbose_name=u'第一审批时间', auto_now_add=True, blank=True, null=True)
     # first_notices = models.TextField(verbose_name=u"第一审批人批注的注意事项", blank=True, null=True)
-    second_approver = models.ForeignKey(User, verbose_name=u'第二审批人', related_name='sheet_second_approver', blank=True, null=True)
+    second_approver = models.ForeignKey(User, verbose_name=u'第二审批人', related_name='sheet_second_approver', blank=True,
+                                        null=True)
     second_approve_time = models.DateTimeField(verbose_name=u'第二审批时间', auto_now_add=True, blank=True, null=True)
+
     # second_notices = models.TextField(verbose_name=u"第二审批人批注的注意事项", blank=True, null=True)
 
     def __unicode__(self):

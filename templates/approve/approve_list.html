@@ -33,12 +33,15 @@
                                     <ul class="sortable-list connectList agile-list ui-sortable" id="to_be_approved">
 
                                         {% for sheet in tobe_approved_list %}
-                                            <li class="info-element">
+                                            <li class="info-element" data-toggle="modal"
+                                                data-target="#AprroveDetailModal"
+                                                onclick="approve_sheet_detail('{{ sheet.id }}', '1')">
                                                 <i class="fa fa-clock-o"></i> {{ sheet.publish_date }} {{ sheet.publish_time }}<br>
                                                 创建人：{{ sheet.creator }}<br>
                                                 项目：{{ sheet.gogroup }}<br>
                                                 环境：{{ sheet.env }}<br>
                                                 重启服务：{{ sheet.services_str }}<br>
+                                                TAPD URL：{{ sheet.tapd_url }}<br>
 
                                                 {% if sheet.approve_level == '1' %}
                                                     审批级别：<span>{{ sheet.level }}</span><br>
@@ -51,16 +54,12 @@
                                                     二级审批人：<span>{{ sheet.second_str }}</span><br>
                                                 {% endif %}
 
-                                                TAPD URL：{{ sheet.tapd_url }}<br>
-                                                SQL：{{ sheet.sql }}<br>
-                                                CONSUL KEY：{{ sheet.consul_key }}
-
-                                                <div class="agile-detail">
-                                                    <a href="javascript:void(0)"
-                                                       class="pull-right btn btn-xs btn-success"
-                                                       onclick="approveSheet('{{ sheet.id }}')">审批</a>
-
-                                                </div>
+{#                                                <div class="agile-detail">#}
+{#                                                    <a href="javascript:void(0)"#}
+{#                                                       class="pull-right btn btn-xs btn-success"#}
+{#                                                       onclick="approveSheet('{{ sheet.id }}')">审批</a>#}
+{##}
+{#                                                </div>#}
                                             </li>
                                         {% endfor %}
 
@@ -79,7 +78,9 @@
                                     <ul class="sortable-list connectList agile-list ui-sortable"
                                         id="approve_refused">
                                         {% for sheet in approve_refused_list %}
-                                            <li class="danger-element">
+                                            <li class="danger-element" data-toggle="modal"
+                                                data-target="#AprroveDetailModal"
+                                                onclick="approve_sheet_detail('{{ sheet.id }}', '2')">
                                                 项目：{{ sheet.gogroup }}<br>
                                                 环境：{{ sheet.env }}<br>
                                                 重启服务：{{ sheet.services_str }}<br>
@@ -94,11 +95,11 @@
                                                     一级审批人：<span>{{ sheet.first_str }}</span><br>
                                                     二级审批人：<span>{{ sheet.second_str }}</span><br>
                                                 {% endif %}
-                                                <div class="agile-detail">
-                                                    <a data-toggle="modal" data-target="#sheetRefuseReasonModal"
-                                                       class="pull-right btn btn-xs btn-danger"
-                                                       onclick="approveRefuseReasonDetail('{{ sheet.id }}')">原因</a>
-                                                </div>
+                                                {#                                                <div class="agile-detail">#}
+                                                {#                                                    <a data-toggle="modal" data-target="#sheetRefuseReasonModal"#}
+                                                {#                                                       class="pull-right btn btn-xs btn-danger"#}
+                                                {#                                                       onclick="approveRefuseReasonDetail('{{ sheet.id }}')">原因</a>#}
+                                                {#                                                </div>#}
 
                                             </li>
                                         {% endfor %}
@@ -116,7 +117,9 @@
 
                                     <ul class="sortable-list connectList agile-list ui-sortable" id="approve_passed">
                                         {% for sheet in approve_passed_list %}
-                                            <li class="success-element">
+                                            <li class="success-element" data-toggle="modal"
+                                                data-target="#AprroveDetailModal"
+                                                onclick="approve_sheet_detail('{{ sheet.id }}', '2')">
                                                 项目：{{ sheet.gogroup }}<br>
                                                 环境：{{ sheet.env }}<br>
                                                 重启服务：{{ sheet.services_str }}<br>
@@ -249,26 +252,34 @@
         </div>
     </div>
 
-    <div class="modal inmodal fade" id="sheetRefuseReasonModal" tabindex="-1" role="dialog"
+{#    <div class="modal inmodal fade" id="sheetRefuseReasonModal" tabindex="-1" role="dialog"#}
+{#         aria-labelledby="addModalLabel"#}
+{#         aria-hidden="true">#}
+{#        <div class="modal-dialog modal-lg">#}
+{#            <div class="modal-content animated fadeIn">#}
+{#                <div class="modal-header">#}
+{#                    <button type="button" class="close" data-dismiss="modal"><span#}
+{#                            aria-hidden="true">×</span><span class="sr-only">Close</span></button>#}
+{#                    <i class="fa fa-times modal-icon"></i>#}
+{#                    <h4 class="modal-title" id="minion_old">拒绝原因</h4>#}
+{#                </div>#}
+{#                <div class="modal-body" id="refuse_reason_modal">#}
+{##}
+{#                </div>#}
+{#                <div class="modal-footer">#}
+{#                    <button type="button" class="btn btn-white" data-dismiss="modal">关闭</button>#}
+{#                    </button>#}
+{#                </div>#}
+{#            </div>#}
+{#        </div>#}
+{#    </div>#}
+
+
+    <div class="modal inmodal fade" id="AprroveDetailModal" tabindex="-1" role="dialog"
          aria-labelledby="addModalLabel"
          aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content animated fadeIn">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal"><span
-                            aria-hidden="true">×</span><span class="sr-only">Close</span></button>
-                    <i class="fa fa-times modal-icon"></i>
-                    <h4 class="modal-title" id="minion_old">拒绝原因</h4>
-                </div>
-                <div class="modal-body" id="refuse_reason_modal">
+        <div class="modal-dialog modal-lg" id="approve_detail_modal">
 
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-white" data-dismiss="modal">关闭</button>
-                    {#                <button type="button" class="btn btn-primary" id="modifyCrontabButton">保存#}
-                    </button>
-                </div>
-            </div>
         </div>
     </div>
 

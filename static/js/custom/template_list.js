@@ -92,7 +92,7 @@ function delete_timeslot(timeslot_id) {
         },
         success: function (result) {
             if (result.code === 0) {
-                $("#"+timeslot_id).remove();
+                window.location.reload();
             }
             else {
                 alert(result.msg);

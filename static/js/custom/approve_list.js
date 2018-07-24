@@ -24,12 +24,12 @@ function init_approval_level() {
     });
 
 
-    $('.level-select').select2({
-        minimumResultsForSearch: Infinity,
-        language: 'zh-CN',
-        width: '100%',
-        placeholder: '请选择',
-    });
+    // $('.level-select').select2({
+    //     minimumResultsForSearch: Infinity,
+    //     language: 'zh-CN',
+    //     width: '100%',
+    //     placeholder: '请选择',
+    // });
 }
 
 $('#createApprove').click(function () {
@@ -85,3 +85,20 @@ function approveRefuseReasonDetail(sheet_id) {
         }
     });
 }
+
+function approve_sheet_detail(sheet_id, can_approve) {
+    let url = '/asset/approve/sheet/detail/?sheet_id=' + sheet_id + '&can_approve=' + can_approve;
+    $.ajax({
+        url: url,
+        type: "GET",
+        success: function (result) {
+            if (result.length > 0) {
+                $("#approve_detail_modal").html(result);
+            }
+        },
+        error: function () {
+            alert('失败');
+        }
+    });
+}
+

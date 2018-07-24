@@ -194,6 +194,8 @@ $("#create_level").click(function () {
         let time_start_list = $('.start-time');
         let time_end_list = $('.end-time');
         let level_select_list = $('.level-select');
+        console.log('level_select_list : ');
+        console.log(level_select_list);
         weekday_start_list.each(function (index, el) {
             level_list.push([el.value, weekday_end_list[index].value, time_start_list[index].value, time_end_list[index].value, level_select_list[index].value]);
         });
@@ -270,7 +272,7 @@ function delete_level(timeslot_id) {
         },
         success: function (result) {
             if (result.code === 0) {
-                $("#"+timeslot_id).remove();
+                window.location.reload();
             }
             else {
                 alert(result.msg);

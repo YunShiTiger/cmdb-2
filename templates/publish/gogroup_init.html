@@ -111,7 +111,7 @@
                                                                                          style="color: #c4c4c4"
                                                                                          href="javascript: void(0);"
                                                                                          data-toggle="modal"
-                                                                                         data-target="#deleteProjectModal"><i
+                                                                                         data-target="#deleteProjectModal_{{ projectinfo.project_id }}"><i
                                                         class="fa fa-times"></i></a></p>
                                                 <p>负责人：
                                                     {% for owner in projectinfo.owner_list %}
@@ -144,7 +144,7 @@
                                                     {{ projectinfo.creator }}
                                                 </p>
                                             </li>
-                                            <div class="modal inmodal fade" id="deleteProjectModal" tabindex="-1"
+                                            <div class="modal inmodal fade" id="deleteProjectModal_{{ projectinfo.project_id }}" tabindex="-1"
                                                  role="dialog"
                                                  aria-labelledby="addModalLabel"
                                                  aria-hidden="true">
@@ -208,66 +208,6 @@
                             <div class="ibox">
                                 <div class="ibox-content">
                                     <form role="form" id="publish_form">
-                                        <div class="row">
-                                            <div class="col-lg-6">
-                                                <div class="form-group">
-                                                    <span style="color: red;">*</span><label>&nbsp;发布项目</label>
-                                                    <select class="form-control" id="project_name"
-                                                            data-live-search="true">
-                                                        {% for projectinfo in gogroup_objs %}
-                                                            <option value={{ projectinfo.name }}>{{ projectinfo.name }}</option>
-                                                        {% endfor %}
-                                                    </select>
-                                                </div>
-                                            </div>
-                                            <div class="col-lg-6">
-                                                <div class="form-group">
-                                                    <span style="color: red;">*</span><label>&nbsp;环境</label>
-                                                    <select class="form-control" id="env_id">
-                                                        <option value='1' selected>生产环境</option>
-                                                        <option value='2'>测试环境</option>
-                                                    </select>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div class="row">
-                                            <div class="col-lg-6">
-                                                <div class="form-group">
-                                                    <span style="color: red;">*</span><label>&nbsp;TAPD URL</label>
-                                                    <input type="text" class="form-control" id="tapd_url">
-                                                </div>
-                                            </div>
-                                            <div class="col-lg-6">
-                                                <div class="form-group">
-                                                    <span style="color: red;">*</span><label>&nbsp;重启服务 (最多选4个)</label>
-                                                    <select id="reboot_services_choice" multiple="multiple"
-                                                            class="form-control" data-live-search="true">
-
-                                                    </select>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div class="row">
-                                            <div class="col-lg-6">
-                                                <div class="form-group">
-                                                    <span style="color: red;">*</span><label>&nbsp;SQL
-                                                    (若有SQL需要执行，请让DBA执行后再发布)</label>
-                                                    <textarea type="text" class="form-control" id="sql"
-                                                              rows="5"></textarea>
-                                                </div>
-                                            </div>
-                                            <div class="col-lg-6">
-                                                <div class="form-group">
-                                                    <span style="color: red;">*</span><label>&nbsp;CONSUL KEY (若有consul
-                                                    key添加或修改，请让运维操作后再发布)</label>
-                                                    <textarea type="text" class="form-control" id="consul_key"
-                                                              rows="5"></textarea>
-                                                </div>
-                                            </div>
-                                        </div>
-
 
                                         <div class="row">
                                             <div class="col-lg-6">
@@ -294,6 +234,191 @@
                                                 </div>
                                             </div>
                                         </div>
+                                        <div class="row">
+                                            <div class="col-lg-6">
+                                                <div class="form-group">
+                                                    <span style="color: red;">*</span><label>&nbsp;发布项目</label>
+                                                    <select class="form-control" id="project_name"
+                                                            data-live-search="true">
+                                                        {% for projectinfo in gogroup_objs %}
+                                                            <option value={{ projectinfo.name }}>{{ projectinfo.name }}</option>
+                                                        {% endfor %}
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-6">
+                                                <div class="form-group">
+                                                    <span style="color: red;">*</span><label>&nbsp;环境</label>
+                                                    <select class="form-control" id="env_id">
+                                                        <option value='1' selected>生产环境</option>
+                                                        <option value='2'>测试环境</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="row">
+                                            <div class="col-lg-6">
+                                                <div class="form-group">
+                                                    <span style="color: red;">*</span><label>&nbsp;测试人</label>
+                                                    <select id="qa_select" multiple="multiple"
+                                                            class="form-control" data-live-search="true">
+                                                        {% for gogroup in user_objs %}
+                                                            <option value={{ gogroup.id }}>{{ gogroup.username }}</option>
+                                                        {% endfor %}
+                                                    </select>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-lg-6">
+                                                <div class="form-group">
+                                                    <span style="color: red;">*</span><label>&nbsp;重启服务 (最多选4个)</label>
+                                                    <select id="reboot_services_choice" multiple="multiple"
+                                                            class="form-control" data-live-search="true">
+
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="row">
+                                            <div class="col-lg-6">
+                                                <div class="form-group">
+                                                    <span style="color: red;">*</span><label>&nbsp;是否code review</label>
+                                                    <div>
+                                                        <label>
+                                                            <input type="radio" value="1" id="if_review1"
+                                                                   name="if_review" checked="">&nbsp;是
+                                                        </label>
+                                                        &nbsp; &nbsp; &nbsp; &nbsp;
+                                                        <label>
+                                                            <input type="radio" value="2" id="if_review2"
+                                                                   name="if_review">&nbsp;否
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-lg-6">
+                                                <div class="form-group">
+                                                    <span style="color: red;">*</span><label>&nbsp;code review 人</label>
+                                                    <select id="review_select" multiple="multiple"
+                                                            class="form-control" data-live-search="true">
+                                                        {% for gogroup in user_objs %}
+                                                            <option value={{ gogroup.id }}>{{ gogroup.username }}</option>
+                                                        {% endfor %}
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="row">
+                                            <div class="col-lg-6">
+                                                <div class="form-group">
+                                                    <span style="color: red;">*</span><label>&nbsp;TAPD URL</label>
+                                                    <textarea type="text" class="form-control" id="tapd_url"
+                                                              rows="5"></textarea>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-6">
+                                                <div class="form-group">
+                                                    <span style="color: red;">*</span><label>&nbsp;CONSUL KEY (若有consul
+                                                    key添加或修改，请让运维操作后再发布)</label>
+                                                    <textarea type="text" class="form-control" id="consul_key"
+                                                              rows="5"></textarea>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="row">
+                                            <div class="col-lg-6">
+                                                <div class="form-group">
+                                                    <span style="color: red;">*</span><label>&nbsp;事前SQL</label>
+                                                    <textarea type="text" class="form-control" id="sql_before"
+                                                              rows="5">无</textarea>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-6">
+                                                <div class="form-group">
+                                                    <span style="color: red;">*</span><label>&nbsp;事后SQL</label>
+                                                    <textarea type="text" class="form-control" id="sql_after"
+                                                              rows="5">无</textarea>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="row">
+                                            <div class="col-lg-6">
+                                                <div class="form-group">
+                                                    <label>&nbsp;备注</label>
+                                                    <textarea type="text" class="form-control" id="comment"
+                                                              rows="5"></textarea>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-6">
+                                                <div class="form-group">
+                                                    <label>&nbsp;紧急发布原因（如需一级/二级审批，必填）</label>
+                                                    <textarea type="text" class="form-control" id="reason"
+                                                              rows="5"></textarea>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="row">
+                                            <div class="col-lg-6">
+                                                <div class="form-group">
+                                                    <span style="color: red;">*</span><label>&nbsp;是否影响用户浏览（首页，搜索，详情页等）</label>
+                                                    <div>
+                                                        <label>
+                                                            <input type="radio" value="2" id="if_browse1"
+                                                                   name="if_browse">&nbsp;是
+                                                        </label>
+                                                        &nbsp;&nbsp;&nbsp;&nbsp;
+                                                        <label>
+                                                            <input type="radio" value="1" id="if_browse2"
+                                                                   name="if_browse" checked="">&nbsp;否
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-6">
+                                                <div class="form-group">
+                                                    <span style="color: red;">*</span><label>&nbsp;是否影响订单流程（注册登录，购物车，订单，支付等）</label>
+                                                    <div>
+                                                        <label>
+                                                            <input type="radio" value="2" id="if_order1"
+                                                                   name="if_order">&nbsp;是
+                                                        </label>
+                                                        &nbsp;&nbsp;&nbsp;&nbsp;
+                                                        <label>
+                                                            <input type="radio" value="1" id="if_order2"
+                                                                   name="if_order" checked="">&nbsp;否
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="row">
+                                            <div class="col-lg-6">
+                                                <div class="form-group">
+                                                    <span style="color: red;">*</span><label>&nbsp;是否影响履单流程（采购分配，提交发货，卖家订单处理等）</label>
+                                                    <div>
+                                                        <label>
+                                                            <input type="radio" value="2" id="if_buy1"
+                                                                   name="if_buy">&nbsp;是
+                                                        </label>
+                                                        &nbsp;&nbsp;&nbsp;&nbsp;
+                                                        <label>
+                                                            <input type="radio" value="1" id="if_buy2"
+                                                                   name="if_buy" checked="">&nbsp;否
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                        </div>
+
 
                                         <br>
                                         <div class="text-center">

@@ -153,7 +153,7 @@
                                                                           style="color: #c4c4c4"
                                                                           href="javascript: void(0);"
                                                                           data-toggle="modal"
-                                                                          data-target="#deleteLevelModal"><i
+                                                                          data-target="#deleteLevelModal_{{ level.timeslot.id }}"><i
                                 class="fa fa-times"></i></a></p>
 
                         <p>项目：
@@ -172,7 +172,7 @@
                         </a>
                     </li>
 
-                    <div class="modal inmodal fade" id="deleteLevelModal" tabindex="-1"
+                    <div class="modal inmodal fade" id="deleteLevelModal_{{ level.timeslot.id }}" tabindex="-1"
                          role="dialog"
                          aria-labelledby="addModalLabel"
                          aria-hidden="true">
@@ -210,7 +210,7 @@
     <div class="modal-dialog modal-lg">
         <div class="modal-content animated fadeIn">
             <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal"><span
+                <button type="button" class="close" data-dismiss="mSQL：odal"><span
                         aria-hidden="true">×</span><span class="sr-only">Close</span></button>
                 <i class="fa fa-clock-o modal-icon"></i>
                 <h4 class="modal-title" id="minion_old">项目--审批级别详情</h4>

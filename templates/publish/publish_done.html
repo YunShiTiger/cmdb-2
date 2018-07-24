@@ -8,12 +8,14 @@
 
             <ul class="sortable-list connectList agile-list ui-sortable" id="publish_done">
                 {% for sheet in done_list %}
-                    <li class="success-element">
+                    <li class="success-element" data-toggle="modal" data-target="#publishDoneDetailModal"
+                        onclick="done_sheet_detail('{{ sheet.id }}')">
                         <i class="fa fa-clock-o"></i> {{ sheet.publish_date }} {{ sheet.publish_time }}<br>
                         创建人：{{ sheet.creator }}<br>
                         项目：{{ sheet.gogroup }}<br>
                         环境：{{ sheet.env }}<br>
                         重启服务：{{ sheet.services_str }}<br>
+                        TAPD URL：{{ sheet.tapd_url }}<br>
 
                         {% if sheet.approve_level == '1' %}
                             审批级别：<span>{{ sheet.level }}</span><br>
@@ -26,9 +28,9 @@
                             二级审批人：<span>{{ sheet.second_str }}</span><br>
                         {% endif %}
 
-                        TAPD URL：{{ sheet.tapd_url }}<br>
-                        SQL：{{ sheet.sql }}<br>
-                        CONSUL KEY：{{ sheet.consul_key }}
+                        {#                        事前SQL：{{ sheet.sql_before }}<br>#}
+                        {#                        事后SQL：{{ sheet.sql_after }}<br>#}
+                        {#                        CONSUL KEY：{{ sheet.consul_key }}#}
                     </li>
                 {% endfor %}
 
@@ -47,12 +49,14 @@
             <ul class="sortable-list connectList agile-list ui-sortable"
                 id="approve_passed">
                 {% for sheet in outtime_notapprove_list %}
-                    <li class="warning-element">
+                    <li class="warning-element" data-toggle="modal" data-target="#publishDoneDetailModal"
+                        onclick="done_sheet_detail('{{ sheet.id }}')">
                         <i class="fa fa-clock-o"></i> {{ sheet.publish_date }} {{ sheet.publish_time }}<br>
                         创建人：{{ sheet.creator }}<br>
                         项目：{{ sheet.gogroup }}<br>
                         环境：{{ sheet.env }}<br>
                         重启服务：{{ sheet.services_str }}<br>
+                        TAPD URL：{{ sheet.tapd_url }}<br>
 
                         {% if sheet.approve_level == '1' %}
                             审批级别：<span>{{ sheet.level }}</span><br>
@@ -65,9 +69,9 @@
                             二级审批人：<span>{{ sheet.second_str }}</span><br>
                         {% endif %}
 
-                        TAPD URL：{{ sheet.tapd_url }}<br>
-                        SQL：{{ sheet.sql }}<br>
-                        CONSUL KEY：{{ sheet.consul_key }}
+                        {#                        事前SQL：{{ sheet.sql_before }}<br>#}
+                        {#                        事后SQL：{{ sheet.sql_after }}<br>#}
+                        {#                        CONSUL KEY：{{ sheet.consul_key }}#}
 
                     </li>
                 {% endfor %}
@@ -86,12 +90,14 @@
             <ul class="sortable-list connectList agile-list ui-sortable"
                 id="approve_passed">
                 {% for sheet in outtime_notpublish_list %}
-                    <li class="warning-element">
+                    <li class="warning-element" data-toggle="modal" data-target="#publishDoneDetailModal"
+                        onclick="done_sheet_detail('{{ sheet.id }}')">
                         <i class="fa fa-clock-o"></i> {{ sheet.publish_date }} {{ sheet.publish_time }}<br>
                         创建人：{{ sheet.creator }}<br>
                         项目：{{ sheet.gogroup }}<br>
                         环境：{{ sheet.env }}<br>
                         重启服务：{{ sheet.services_str }}<br>
+                        TAPD URL：{{ sheet.tapd_url }}<br>
 
                         {% if sheet.approve_level == '1' %}
                             审批级别：<span>{{ sheet.level }}</span><br>
@@ -104,13 +110,21 @@
                             二级审批人：<span>{{ sheet.second_str }}</span><br>
                         {% endif %}
 
-                        TAPD URL：{{ sheet.tapd_url }}<br>
-                        SQL：{{ sheet.sql }}<br>
-                        CONSUL KEY：{{ sheet.consul_key }}
+                        {#                        事前SQL：{{ sheet.sql_before }}<br>#}
+                        {#                        事后SQL：{{ sheet.sql_after }}<br>#}
+                        {#                        CONSUL KEY：{{ sheet.consul_key }}#}
                     </li>
                 {% endfor %}
             </ul>
         </div>
+    </div>
+</div>
+
+<div class="modal inmodal fade" id="publishDoneDetailModal" tabindex="-1" role="dialog"
+     aria-labelledby="addModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog modal-lg" id="done_detail_modal">
+
     </div>
 </div>
 

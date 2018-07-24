@@ -1,6 +1,6 @@
 
 function get_reboot_services(project_name, env_id) {
-    $('#reboot_services_choice').val(null).trigger('change');
+    $('#reboot_services_choice').val(null).trigger('change');     $('#reboot_services_choice').empty();
     $('#reboot_services_choice').on("removed", function () {
     });
     let old_obj = document.getElementById('reboot_services_choice');
@@ -66,12 +66,18 @@ function init_tab3() {
     get_reboot_services(project_name, env_id);
 }
 
-
-$('#createPublish').click(function () {
-    document.getElementById('createTab').style.display = '';
-    $("#publishSheet").removeClass("active");
-    $("#tab-2").removeClass("active");
-    $("#createTab").addClass("active");
-    $("#tab-3").addClass("active");
-    init_tab3();
-});
+function done_sheet_detail(sheet_id) {
+    let url = '/asset/publishsheet/detail/?sheet_id=' + sheet_id + '&can_publish=2';
+    $.ajax({
+        url: url,
+        type: "GET",
+        success: function (result) {
+            if (result.length > 0) {
+                $("#done_detail_modal").html(result);
+            }
+        },
+        error: function () {
+            alert('失败');
+        }
+    });
+}
