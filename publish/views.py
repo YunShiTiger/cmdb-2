@@ -312,10 +312,13 @@ def LevelDelete(request):
         projectinfo_objs = timeslot_obj.project_timeslotlevel.all()
 
         for projectinfo in projectinfo_objs:
-            if projectinfo.creator == user:
-                print 'project info creator == user'
-                projectinfo.timeslot_level.remove(timeslot_obj)
-                asset_utils.logs(user.username, ip, 'delete project--approval level', 'success')
+            # print projectinfo
+            # print projectinfo.creator
+            # print user
+            # if projectinfo.creator == user:
+            #     print 'project info creator == user'
+            projectinfo.timeslot_level.remove(timeslot_obj)
+            asset_utils.logs(user.username, ip, 'delete project--approval level', 'success')
 
     data = dict(code=errcode, msg=msg)
     return HttpResponse(json.dumps(data), content_type='application/json')

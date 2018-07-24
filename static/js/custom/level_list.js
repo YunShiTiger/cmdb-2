@@ -196,9 +196,14 @@ $("#create_level").click(function () {
         let level_select_list = $('.level-select');
         console.log('level_select_list : ');
         console.log(level_select_list);
-        weekday_start_list.each(function (index, el) {
-            level_list.push([el.value, weekday_end_list[index].value, time_start_list[index].value, time_end_list[index].value, level_select_list[index].value]);
+        level_select_list.each(function (index, el) {
+            console.log(index);
+            level_list.push([weekday_start_list[index].value, weekday_end_list[index].value, time_start_list[index].value, time_end_list[index].value, el.value]);
         });
+        // weekday_start_list.each(function (index, el) {
+        //     console.log(index);
+        //     level_list.push([el.value, weekday_end_list[index].value, time_start_list[index].value, time_end_list[index].value, level_select_list[index].value]);
+        // });
         data = {
             'radio': radio,
             'project_select_list': project_select_list,
