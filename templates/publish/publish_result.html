@@ -1,0 +1,27 @@
+<div class="col-lg-12">
+    <div class="ibox">
+        <div class="ibox-content">
+            <div class="text-center">
+                <h3>发布结果</h3>
+                <p style="color: blue"><i class="fa fa-check-square-o"></i> 服务发布上线后，请检查服务是否正常！！！</p>
+            </div>
+
+            <ul class="sortable-list connectList agile-list ui-sortable" id="publish_done">
+                {% for dic in publish_result %}
+                    <li {% if publish_ok == '1' %} class="success-element" {% else %} class="danger-element" {% endif %}>
+                        {% for k,v in dic.items %}
+                            <h2 style="color: red">{{ k }}:</h2>
+
+                            <pre style="border: none">
+                            <li>{{ v }}</li>
+                            </pre>
+
+                        {% endfor %}
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</div>
+
+<script src="/static/js/custom/publish_result.js"></script>

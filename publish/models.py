@@ -131,6 +131,8 @@ class PublishSheet(models.Model):
     if_browse = models.CharField(choices=IF_OR_NOT, max_length=32, verbose_name=u"是否影响用户浏览", default='2')
     if_order = models.CharField(choices=IF_OR_NOT, max_length=32, verbose_name=u"是否影响订单流程", default='2')
     if_buy = models.CharField(choices=IF_OR_NOT, max_length=32, verbose_name=u"是否影响履单流程", default='2')
+    if_publish_ok = models.CharField(choices=IF_OR_NOT, max_length=32, verbose_name=u"是否发布成功", default='2')
+    publish_result = models.TextField(verbose_name=u"发布结果", blank=True, null=True)
 
     def __unicode__(self):
         return self.tapd_url

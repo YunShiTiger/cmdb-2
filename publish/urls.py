@@ -24,6 +24,7 @@ urlpatterns = patterns('',
                        url(r'^publishsheet/reason/$', PublishSheetRefuseReason, name='PublishSheetRefuseReason'),
                        url(r'^publishsheet/detail/$', PublishSheetDetail, name='PublishSheetDetail'),
                        url(r'^publishsheet/publish/start/$', StartPublish, name='StartPublish'),
+                       url(r'^publishsheet/publish/result/$', PublishResult, name='PublishResult'),
 
                        url(r'^approve/list/$', ApproveList, name='ApproveList'),
                        url(r'^approve/init/$', ApproveInit, name='ApproveInit'),  # 单个审批单

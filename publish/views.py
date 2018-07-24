@@ -465,7 +465,7 @@ def PublishSheetList(request):
                 # 超时
                 if publish.status == '1':
                     # 状态为审批中
-                    print 'publish.id : ', publish.id
+                    # print 'publish.id : ', publish.id
                     if publish.approval_level.name == '1':
                         # 无需审批的单子
                         if publish_datetime_int + 3600 < now_int:
@@ -473,9 +473,13 @@ def PublishSheetList(request):
                             publish.status = '5'
                             publish.save()
                         else:
-                            print 'here----can_publish'
+                            # print 'here----can_publish'
                             # 超时15分钟之内，可以发布
                             tmp_dict['can_publish'] = True
+                            if tmp_dict['can_publish'] and user == publish.creator:
+                                tmp_dict['can_publish'] = True
+                            else:
+                                tmp_dict['can_publish'] = False
                             approve_passed_list.append(tmp_dict)
                     else:
                         # 一级审批和二级审批的单子，超时未审批
@@ -492,6 +496,10 @@ def PublishSheetList(request):
                         else:
                             # 超时15分钟之内，可以发布
                             tmp_dict['can_publish'] = True
+                            if tmp_dict['can_publish'] and user == publish.creator:
+                                tmp_dict['can_publish'] = True
+                            else:
+                                tmp_dict['can_publish'] = False
                             approve_passed_list.append(tmp_dict)
                     else:
                         # 二级审批
@@ -513,12 +521,11 @@ def PublishSheetList(request):
                                 else:
                                     # 超时15分钟之内，可以发布
                                     tmp_dict['can_publish'] = True
+                                    if tmp_dict['can_publish'] and user == publish.creator:
+                                        tmp_dict['can_publish'] = True
+                                    else:
+                                        tmp_dict['can_publish'] = False
                                     approve_passed_list.append(tmp_dict)
-
-            if tmp_dict['can_publish'] and user == publish.creator:
-                tmp_dict['can_publish'] = True
-            else:
-                tmp_dict['can_publish'] = False
 
         else:
             tmp_dict['can_publish'] = False
@@ -580,7 +587,7 @@ def PublishSheetList(request):
     data = dict(code=errcode, msg=msg, tobe_approved_list=tobe_approved_list, approve_refused_list=approve_refused_list,
                 approve_passed_list=approve_passed_list)
 
-    return render_to_response('publish/publish_sheets.html', data)
+    return render_to_response('publish/publish_sheets_list.html', data)
 
 
 @login_required
@@ -1017,7 +1024,7 @@ def ApproveInit(request):
         errcode = 500
         msg = u'发布单不存在'
         data = dict(code=errcode, msg=msg)
-        return render_to_response('publish/publish_sheets.html', data)
+        return render_to_response('publish/publish_sheets_list.html', data)
     else:
         tmp_dict = utils.serialize_instance(publishsheet)
         service_objs = publishsheet.goservices.all()
@@ -1118,6 +1125,8 @@ def PublishSheetDetail(request):
     sheet_id = int(request.GET['sheet_id'])
     can_publish = request.GET['can_publish']
     can_delete = request.GET.get('can_delete', '2')
+    user = request.user
+    can_see_result = False
 
     try:
         sheet_obj = models.PublishSheet.objects.get(id=sheet_id)
@@ -1151,6 +1160,17 @@ def PublishSheetDetail(request):
         content['if_browse'] = sheet_obj.get_if_browse_display()
         content['if_order'] = sheet_obj.get_if_order_display()
         content['if_buy'] = sheet_obj.get_if_buy_display()
+
+        if sheet_obj.creator == user:
+            if approve_level == '1' and sheet_obj.status != '4':
+                can_delete = '1'
+            else:
+                can_delete = can_delete
+        else:
+            can_delete = '2'
+
+        if sheet_obj.status == '4':
+            can_see_result = True
 
         content.update({'id': sheet_obj.id, 'gogroup': gogroup_obj.name, 'services_str': services_str, 'env': env,
                         'approve_level': approve_level, 'level': level, 'creator': sheet_obj.creator.username,
@@ -1190,6 +1210,7 @@ def PublishSheetDetail(request):
 
     content['can_publish'] = can_publish
     content['can_delete'] = can_delete
+    content['can_see_result'] = can_see_result
     data = dict(code=errcode, msg=msg, content=content)
     return render_to_response('publish/publish_sheet_detail.html', data)
 
@@ -1198,7 +1219,7 @@ def PublishSheetDetail(request):
 def StartPublish(request):
     user = request.user
     ip = request.META['REMOTE_ADDR']
-    sheet_id = int(request.POST['sheet_id'])
+    sheet_id = int(request.GET['sheet_id'])
     errcode = 0
     msg = 'ok'
     try:
@@ -1222,32 +1243,71 @@ def StartPublish(request):
         env = goservices[0].env
         tower_url = publishsheet.tapd_url
 
-        publish_ok = True
+        publish_ok = '1'
 
         Publish = asset_utils.goPublish(env)
 
         result = []
         for svc in services:
-            rst = Publish.deployGo(goproject_name, svc, request.user.username, ip, tower_url, phone_number)
-            result.extend(rst)
+            try:
+                rst = Publish.deployGo(goproject_name, svc, request.user.username, ip, tower_url, phone_number)
+            except Exception as e:
+                print 'StartPublish---e.message : ', e.message
+                publish_ok = '2'
+            else:
+                result.extend(rst)
 
             # break once deploy failed
-            if not asset_utils.get_service_status(svc):
+            res = asset_utils.get_service_status(svc)
+            print 'StartPublish---res : ', res
+            if not res:
                 print("deploy %s failed" % svc)
-                publish_ok = False
+                publish_ok = '2'
                 break
 
-        if publish_ok:
+        print 'StartPublish---publish_ok : ', publish_ok
+        publishsheet.publish_result = result
+
+        if publish_ok == '1':
             publishsheet.status = '4'
+            publishsheet.if_publish_ok = '1'
             publishsheet.save()
-            print 'publish ok'
             asset_utils.logs(user.username, ip, 'deploy publish sheet', 'success')
         else:
-            print 'publish failed'
+            publishsheet.status = '4'
+            publishsheet.if_publish_ok = '2'
+            publishsheet.save()
             asset_utils.logs(user.username, ip, 'deploy publish sheet', 'failed')
 
-    data = dict(code=errcode, msg=msg)
-    return HttpResponse(json.dumps(data), content_type='application/json')
+        print 'StartPublish^^^^^^^^^^result^^^^^^^^^^^^^^^'
+        print result
+    data = dict(code=errcode, msg=msg, publish_result=result, publish_ok=publish_ok)
+    return render_to_response('publish/publish_result.html', data)
+
+
+@login_required
+def PublishResult(request):
+    user = request.user
+    ip = request.META['REMOTE_ADDR']
+    sheet_id = int(request.GET['sheet_id'])
+    errcode = 0
+    msg = 'ok'
+    try:
+        publishsheet = models.PublishSheet.objects.get(id=sheet_id)
+    except models.PublishSheet.DoesNotExist:
+        errcode = 500
+        msg = u'发布单不存在'
+        data = dict(code=errcode, msg=msg)
+        return HttpResponse(json.dumps(data), content_type='application/json')
+    else:
+        result = eval(publishsheet.publish_result)
+        publish_ok = publishsheet.if_publish_ok
+        print result
+        print type(result)
+        print publish_ok
+        print type(publish_ok)
+        data = dict(code=errcode, msg=msg, publish_result=result, publish_ok=publish_ok)
+        return render_to_response('publish/publish_result.html', data)
 
 
 @login_required

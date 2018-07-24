@@ -79,7 +79,8 @@ function init_tab3() {
         width: '100%',
         placeholder: '请选择',
     });
-    $('#reboot_services_choice').val(null).trigger('change');     $('#reboot_services_choice').empty();
+    $('#reboot_services_choice').val(null).trigger('change');
+    $('#reboot_services_choice').empty();
 
     let env_id = $('#env_id').val();
     get_reboot_services(project_name, env_id);
@@ -93,6 +94,9 @@ $('#createPublish').click(function () {
     $("#createTab").addClass("active");
     $("#tab-3").addClass("active");
     init_tab3();
+    document.getElementById('publishResult').style.display = 'none';
+    $("#publishResult").removeClass("active");
+    $("#tab-7").removeClass("active");
 });
 
 function delete_publishsheet(sheet_id) {
@@ -179,24 +183,13 @@ function publish_sheet_detail(sheet_id, can_delete=2) {
 }
 
 function start_publish(sheet_id) {
-    let url = '/asset/publishsheet/publish/start/';
-    let data = {
-        'sheet_id': sheet_id
-    };
+    let url = '/asset/publishsheet/publish/start/?sheet_id='+sheet_id;
     $.ajax({
         url: url,
-        type: "POST",
-        data: data,
-        contentType: 'application/x-www-form-urlencoded',
-        traditional: true,
+        type: "GET",
         success: function (result) {
-            if (result.code === 0) {
-                alert('发布成功，请检查服务是否正常！！！');
-            }
-            else {
-                alert(result.msg);
-            }
-            $("#page_loading").hide();
+            init_tab7();
+            $("#publish_result").html(result);
         },
         error: function () {
             alert('失败');
@@ -204,3 +197,39 @@ function start_publish(sheet_id) {
     });
 }
 
+function init_tab7() {
+    document.getElementById('publishResult').style.display = '';
+    document.getElementById('createTab').style.display = 'none';
+    document.getElementById('doneSheet').style.display = 'none';
+    document.getElementById('initTemplate').style.display = 'none';
+    $("#projectInfo").removeClass("active");
+    $("#tab-1").removeClass("active");
+    $("#publishSheet").removeClass("active");
+    $("#tab-2").removeClass("active");
+    $("#createTab").removeClass("active");
+    $("#tab-3").removeClass("active");
+    $("#doneSheet").removeClass("active");
+    $("#tab-4").removeClass("active");
+    $("#initTemplate").removeClass("active");
+    $("#tab-5").removeClass("active");
+    $("#approvalLevelList").removeClass("active");
+    $("#tab-6").removeClass("active");
+
+    $("#publishResult").addClass("active");
+    $("#tab-7").addClass("active");
+}
+
+function see_publish_result(sheet_id) {
+    let url = '/asset/publishsheet/publish/result/?sheet_id='+sheet_id;
+    $.ajax({
+        url: url,
+        type: "GET",
+        success: function (result) {
+            init_tab7();
+            $("#publish_result").html(result);
+        },
+        error: function () {
+            alert('失败');
+        }
+    });
+}

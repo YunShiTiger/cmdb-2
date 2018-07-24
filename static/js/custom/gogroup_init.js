@@ -1,10 +1,12 @@
 $(document).ready(function () {
-    $('#reboot_services_choice').val(null).trigger('change');     $('#reboot_services_choice').empty();
+    $('#reboot_services_choice').val(null).trigger('change');
+    $('#reboot_services_choice').empty();
     init_tab1();
 });
 
 function init_tab1() {
-    $('#reboot_services_choice').val(null).trigger('change');     $('#reboot_services_choice').empty();
+    $('#reboot_services_choice').val(null).trigger('change');
+    $('#reboot_services_choice').empty();
     $('#project_select').select2({
         placeholder: '请选择',
         allowClear: true
@@ -29,7 +31,8 @@ function init_tab1() {
 }
 
 function init_tab2() {
-    $('#reboot_services_choice').val(null).trigger('change');     $('#reboot_services_choice').empty();
+    $('#reboot_services_choice').val(null).trigger('change');
+    $('#reboot_services_choice').empty();
     let url = '/asset/publishsheet/list/';
     $.ajax({
         url: url,
@@ -54,6 +57,7 @@ $("#projectInfo").click(function () {
     document.getElementById('createTab').style.display = 'none';
     document.getElementById('doneSheet').style.display = 'none';
     document.getElementById('initTemplate').style.display = 'none';
+    document.getElementById('publishResult').style.display = 'none';
     $("#publishSheet").removeClass("active");
     $("#tab-2").removeClass("active");
     $("#createTab").removeClass("active");
@@ -67,12 +71,15 @@ $("#projectInfo").click(function () {
     $("#tab-5").removeClass("active");
     $("#approvalLevelList").removeClass("active");
     $("#tab-6").removeClass("active");
+    $("#publishResult").removeClass("active");
+    $("#tab-7").removeClass("active");
 });
 
 $("#publishSheet").click(function () {
     document.getElementById('createTab').style.display = 'none';
     document.getElementById('doneSheet').style.display = 'none';
     document.getElementById('initTemplate').style.display = 'none';
+    document.getElementById('publishResult').style.display = 'none';
     $("#projectInfo").removeClass("active");
     $("#tab-1").removeClass("active");
     $("#createTab").removeClass("active");
@@ -86,6 +93,8 @@ $("#publishSheet").click(function () {
     $("#tab-5").removeClass("active");
     $("#approvalLevelList").removeClass("active");
     $("#tab-6").removeClass("active");
+    $("#publishResult").removeClass("active");
+    $("#tab-7").removeClass("active");
 });
 
 
@@ -160,8 +169,8 @@ $("#create_publishsheet").click(function () {
 
     let if_review = $("input[name='if_review']:checked").val();
     let review_list = $('#review_select').val();
-    if (if_review === '1'){
-        if (!review_list){
+    if (if_review === '1') {
+        if (!review_list) {
             alert('请选择code review 人');
             return false;
         }
@@ -253,11 +262,15 @@ $("#done_sheets").click(function () {
     init_tab4();
     $("#approvalLevelList").removeClass("active");
     $("#tab-6").removeClass("active");
+    document.getElementById('publishResult').style.display = 'none';
+    $("#publishResult").removeClass("active");
+    $("#tab-7").removeClass("active");
 });
 
 
 function init_tab4() {
-    $('#reboot_services_choice').val(null).trigger('change');     $('#reboot_services_choice').empty();
+    $('#reboot_services_choice').val(null).trigger('change');
+    $('#reboot_services_choice').empty();
     let url = '/asset/publishsheet/list/done/';
     $.ajax({
         url: url,
@@ -281,6 +294,7 @@ function init_tab4() {
 $("#template_init").click(function () {
     document.getElementById('createTab').style.display = 'none';
     document.getElementById('doneSheet').style.display = 'none';
+    document.getElementById('publishResult').style.display = 'none';
     document.getElementById('initTemplate').style.display = '';
     $("#projectInfo").removeClass("active");
     $("#tab-1").removeClass("active");
@@ -296,10 +310,13 @@ $("#template_init").click(function () {
     init_tab5();
     $("#approvalLevelList").removeClass("active");
     $("#tab-6").removeClass("active");
+    $("#publishResult").removeClass("active");
+    $("#tab-7").removeClass("active");
 });
 
 function init_tab5() {
-    $('#reboot_services_choice').val(null).trigger('change');     $('#reboot_services_choice').empty();
+    $('#reboot_services_choice').val(null).trigger('change');
+    $('#reboot_services_choice').empty();
     let url = '/asset/project/template/list/';
     $.ajax({
         url: url,
@@ -324,6 +341,7 @@ $("#approvalLevelList").click(function () {
     document.getElementById('createTab').style.display = 'none';
     document.getElementById('doneSheet').style.display = 'none';
     document.getElementById('initTemplate').style.display = 'none';
+    document.getElementById('publishResult').style.display = 'none';
     $("#projectInfo").removeClass("active");
     $("#tab-1").removeClass("active");
     $("#publishSheet").removeClass("active");
@@ -337,11 +355,15 @@ $("#approvalLevelList").click(function () {
 
     $("#approvalLevelList").addClass("active");
     $("#tab-6").addClass("active");
+    $("#publishResult").removeClass("active");
+    $("#tab-7").removeClass("active");
     init_tab6();
+
 });
 
 function init_tab6() {
-    $('#reboot_services_choice').val(null).trigger('change');     $('#reboot_services_choice').empty();
+    $('#reboot_services_choice').val(null).trigger('change');
+    $('#reboot_services_choice').empty();
     let url = '/asset/project/level/list/';
     $.ajax({
         url: url,

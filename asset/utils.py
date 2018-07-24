@@ -63,17 +63,20 @@ def get_service_status(service_name):
     # Supervisord model instance
     for i in _srv:
         _svd = gostatus.objects.filter(hostname=i.saltminion.id).first()
-        try:
-            s = xmlrpclib.Server('http://%s:%s@%s:%s/RPC2' % (_svd.supervisor_username, _svd.supervisor_password,
-                                                              _svd.supervisor_host, _svd.supervisor_port))
-            info = s.supervisor.getProcessInfo(service_name)
-            if info['state'] in [30,100,200,1000]:
-                return False
-            else:
+        if _svd:
+            try:
+                s = xmlrpclib.Server('http://%s:%s@%s:%s/RPC2' % (_svd.supervisor_username, _svd.supervisor_password,
+                                                                  _svd.supervisor_host, _svd.supervisor_port))
+                info = s.supervisor.getProcessInfo(service_name)
+                if info['state'] in [30,100,200,1000]:
+                    return False
+                else:
+                    return True
+            except Exception, e:
+                print e
                 return True
-        except Exception, e:
-            print e
-            return True
+        else:
+            return False
 
 
 def get_svn_revision(svn_log):
@@ -119,6 +122,7 @@ class goPublish:
         for s in services_info:
             go_template = GOTemplate.objects.filter(project=s.group).filter(hostname=s.saltminion).first()
             # update conf file
+
             if go_template:
                 svn_gotemplate = self.saltCmd.cmd('%s' % s.saltminion.saltname, 'cmd.run',
                     ['svn update -r%s --username=%s --password=%s --non-interactive %s && svn log -l 1 --username=%s --password=%s --non-interactive %s'
@@ -126,6 +130,7 @@ class goPublish:
             else:
                 svn_gotemplate = {'Warning':'#####################Not gotemplate file######################'}
             result.append(svn_gotemplate)
+
             for p in self.svnInfo:
                 if p.project.name == self.name:
                     deploy_pillar = "pillar=\"{'project':'" + self.name + "'}\""
@@ -139,9 +144,16 @@ class goPublish:
                         ['svn update -r%s --username=%s --password=%s --non-interactive %s && svn log -l 1 --username=%s --password=%s --non-interactive %s'
                         % (self.svn_revision,p.username, p.password, p.localpath, p.username, p.password, p.localpath)])
                     result.append(svn)
-            restart = self.saltCmd.cmd('%s' % s.saltminion.saltname,'cmd.run',['supervisorctl restart %s' % self.services])
-            result.append(restart)
 
+            restart = ''
+            try:
+                restart = self.saltCmd.cmd('%s' % s.saltminion.saltname,'cmd.run',['supervisorctl restart %s' % self.services])
+            except Exception as e:
+                print 'restart-----Exception : ', e.message
+                result.append({'run salt cmd FAILED': e.message})
+            else:
+                print 'restart : ', restart
+                result.append(restart)
 
             info = self.name + "(" + tower_url + ")"
             if self.svn_revision == 'head':
