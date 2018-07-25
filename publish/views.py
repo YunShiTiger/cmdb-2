@@ -36,7 +36,7 @@ def initProject(request):
         project_list.append(tmp_dict)
 
     # 分页
-    paginator = Paginator(project_list, 1)
+    paginator = Paginator(project_list, 10)
     try:
         final_projectinfo_list = paginator.page(page)
     except PageNotAnInteger:
@@ -160,7 +160,7 @@ def LevelList(request):
                 {'timeslot': timeslot, 'project_list': project_list, 'creator': timeslot.creator.username})
 
     # 分页
-    paginator = Paginator(level_list, 1)
+    paginator = Paginator(level_list, 10)
     try:
         final_level_list = paginator.page(page)
     except PageNotAnInteger:
@@ -346,9 +346,18 @@ def LevelDelete(request):
 
 @login_required
 def templateList(request):
+    page = request.GET.get('page', 1)
     timeslot_objs = models.TimeSlotLevel.objects.filter(is_global='2').order_by('approval_level__name', 'start_of_week',
                                                                                 'end_of_week', 'start_time', 'end_time')
-    return render(request, 'publish/template_list.html', {'timeslot_objs': timeslot_objs})
+    # 分页
+    paginator = Paginator(timeslot_objs, 10)
+    try:
+        final_level_list = paginator.page(page)
+    except PageNotAnInteger:
+        final_level_list = paginator.page(1)
+    except EmptyPage:
+        final_level_list = paginator.page(paginator.num_pages)
+    return render(request, 'publish/template_list.html', {'timeslot_objs': final_level_list})
 
 
 @login_required
@@ -425,9 +434,9 @@ def templateDelete(request):
 
 @login_required
 def PublishSheetList(request):
-    page1 = request.GET.get('page1', 1)
-    page2 = request.GET.get('page2', 1)
-    page3 = request.GET.get('page3', 1)
+    page_1 = request.GET.get('page_1', 1)
+    page_2 = request.GET.get('page_2', 1)
+    page_3 = request.GET.get('page_3', 1)
     errcode = 0
     msg = 'ok'
     user = request.user
@@ -580,29 +589,29 @@ def PublishSheetList(request):
                             approve_passed_list.append(tmp_dict)
 
     # 分页
-    paginator = Paginator(tobe_approved_list, 2)
+    paginator1 = Paginator(tobe_approved_list, 10)
     try:
-        tobe_approved_list = paginator.page(page1)
+        tobe_approved_list = paginator1.page(page_1)
     except PageNotAnInteger:
-        tobe_approved_list = paginator.page(1)
+        tobe_approved_list = paginator1.page(1)
     except EmptyPage:
-        tobe_approved_list = paginator.page(paginator.num_pages)
+        tobe_approved_list = paginator1.page(paginator1.num_pages)
 
-    paginator = Paginator(approve_refused_list, 2)
+    paginator2 = Paginator(approve_refused_list, 10)
     try:
-        approve_refused_list = paginator.page(page2)
+        approve_refused_list = paginator2.page(page_2)
     except PageNotAnInteger:
-        approve_refused_list = paginator.page(1)
+        approve_refused_list = paginator2.page(1)
     except EmptyPage:
-        approve_refused_list = paginator.page(paginator.num_pages)
+        approve_refused_list = paginator2.page(paginator2.num_pages)
 
-    paginator = Paginator(approve_passed_list, 2)
+    paginator3 = Paginator(approve_passed_list, 10)
     try:
-        approve_passed_list = paginator.page(page3)
+        approve_passed_list = paginator3.page(page_3)
     except PageNotAnInteger:
-        approve_passed_list = paginator.page(1)
+        approve_passed_list = paginator3.page(1)
     except EmptyPage:
-        approve_passed_list = paginator.page(paginator.num_pages)
+        approve_passed_list = paginator3.page(paginator3.num_pages)
 
     data = dict(code=errcode, msg=msg, tobe_approved_list=tobe_approved_list, approve_refused_list=approve_refused_list,
                 approve_passed_list=approve_passed_list)
@@ -613,6 +622,9 @@ def PublishSheetList(request):
 @login_required
 def PublishSheetDoneList(request):
     # 已完成 & 超时未审批 & 超时未发布的发布单
+    page_1 = request.GET.get('page_1', 1)
+    page_2 = request.GET.get('page_2', 1)
+    page_3 = request.GET.get('page_3', 1)
     publishsheets = models.PublishSheet.objects.all().order_by('publish_date', 'publish_time')
 
     done_list = []
@@ -661,8 +673,34 @@ def PublishSheetDoneList(request):
 
     errcode = 0
     msg = 'ok'
-    data = dict(code=errcode, msg=msg, done_list=done_list, outtime_notpublish_list=outtime_notpublish_list,
-                outtime_notapprove_list=outtime_notapprove_list)
+    # 分页
+    paginator1 = Paginator(done_list, 10)
+    try:
+        final_done_list = paginator1.page(page_1)
+    except PageNotAnInteger:
+        final_done_list = paginator1.page(1)
+    except EmptyPage:
+        final_done_list = paginator1.page(paginator1.num_pages)
+
+    paginator2 = Paginator(outtime_notpublish_list, 10)
+    try:
+        final_outtime_notpublish_list = paginator2.page(page_3)
+    except PageNotAnInteger:
+        final_outtime_notpublish_list = paginator2.page(1)
+    except EmptyPage:
+        final_outtime_notpublish_list = paginator2.page(paginator2.num_pages)
+
+    paginator3 = Paginator(outtime_notapprove_list, 10)
+    try:
+        final_outtime_notapprove_list = paginator3.page(page_2)
+    except PageNotAnInteger:
+        final_outtime_notapprove_list = paginator3.page(1)
+    except EmptyPage:
+        final_outtime_notapprove_list = paginator3.page(paginator3.num_pages)
+
+    data = dict(code=errcode, msg=msg, done_list=final_done_list,
+                outtime_notapprove_list=final_outtime_notapprove_list,
+                outtime_notpublish_list=final_outtime_notpublish_list)
 
     return render_to_response('publish/publish_done.html', data)
 
@@ -710,6 +748,13 @@ def PublishSheetRefuseReason(request):
 
     data = dict(code=errcode, msg=msg, content=content)
     return render_to_response('publish/publish_sheet_refusereason.html', data)
+
+
+@login_required()
+def createPublishSheetInit(request):
+    gogroup_objs = asset_models.gogroup.objects.all()
+    user_objs = User.objects.all()
+    return render(request, 'publish/publish_create.html', {'gogroup_objs': gogroup_objs, 'user_objs': user_objs})
 
 
 @login_required
@@ -929,6 +974,9 @@ def PublishSheetDelete(request):
 
 @login_required
 def ApproveList(request):
+    page_1 = request.GET.get('page_1', 1)
+    page_2 = request.GET.get('page_2', 1)
+    page_3 = request.GET.get('page_3', 1)
     user = request.user
     publishsheets = models.PublishSheet.objects.all().order_by('publish_date', 'publish_time')
 
@@ -1028,6 +1076,30 @@ def ApproveList(request):
                                 if history_obj.second_approver == user:
                                     approve_passed_list.append(tmp_dict)
 
+    # 分页
+    paginator1 = Paginator(tobe_approved_list, 10)
+    try:
+        tobe_approved_list = paginator1.page(page_1)
+    except PageNotAnInteger:
+        tobe_approved_list = paginator1.page(1)
+    except EmptyPage:
+        tobe_approved_list = paginator1.page(paginator1.num_pages)
+    paginator2 = Paginator(approve_refused_list, 10)
+
+    try:
+        approve_refused_list = paginator2.page(page_2)
+    except PageNotAnInteger:
+        approve_refused_list = paginator2.page(1)
+    except EmptyPage:
+        approve_refused_list = paginator2.page(paginator2.num_pages)
+    paginator3 = Paginator(approve_passed_list, 10)
+
+    try:
+        approve_passed_list = paginator3.page(page_3)
+    except PageNotAnInteger:
+        approve_passed_list = paginator3.page(1)
+    except EmptyPage:
+        approve_passed_list = paginator3.page(paginator3.num_pages)
     return render(request, 'approve/approve_list.html',
                   {'tobe_approved_list': tobe_approved_list, 'approve_refused_list': approve_refused_list,
                    'approve_passed_list': approve_passed_list})

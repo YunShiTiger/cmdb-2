@@ -53,16 +53,23 @@
                                                     一级审批人：<span>{{ sheet.first_str }}</span><br>
                                                     二级审批人：<span>{{ sheet.second_str }}</span><br>
                                                 {% endif %}
-
-{#                                                <div class="agile-detail">#}
-{#                                                    <a href="javascript:void(0)"#}
-{#                                                       class="pull-right btn btn-xs btn-success"#}
-{#                                                       onclick="approveSheet('{{ sheet.id }}')">审批</a>#}
-{##}
-{#                                                </div>#}
                                             </li>
                                         {% endfor %}
 
+                                    </ul>
+
+                                <ul class="pager">
+                                        {% if tobe_approved_list.has_previous %}
+                                            <li>
+                                                <a href="?page_1={{ tobe_approved_list.previous_page_number }}">Previous</a>
+                                            </li>
+                                        {% endif %}
+                                        <li>Page {{ tobe_approved_list.number }}
+                                            of {{ tobe_approved_list.paginator.num_pages }}.
+                                        </li>
+                                        {% if tobe_approved_list.has_next %}
+                                            <li><a href="?page_1={{ tobe_approved_list.next_page_number }}">Next</a></li>
+                                        {% endif %}
                                     </ul>
                                 </div>
                             </div>
@@ -95,14 +102,22 @@
                                                     一级审批人：<span>{{ sheet.first_str }}</span><br>
                                                     二级审批人：<span>{{ sheet.second_str }}</span><br>
                                                 {% endif %}
-                                                {#                                                <div class="agile-detail">#}
-                                                {#                                                    <a data-toggle="modal" data-target="#sheetRefuseReasonModal"#}
-                                                {#                                                       class="pull-right btn btn-xs btn-danger"#}
-                                                {#                                                       onclick="approveRefuseReasonDetail('{{ sheet.id }}')">原因</a>#}
-                                                {#                                                </div>#}
 
                                             </li>
                                         {% endfor %}
+                                    </ul>
+                                <ul class="pager">
+                                        {% if approve_refused_list.has_previous %}
+                                            <li><a href="?page_2={{ approve_refused_list.previous_page_number }}">Previous</a>
+                                            </li>
+                                        {% endif %}
+                                        <li>Page {{ approve_refused_list.number }}
+                                            of {{ approve_refused_list.paginator.num_pages }}.
+                                        </li>
+                                        {% if approve_refused_list.has_next %}
+                                            <li><a href="?page_2={{ approve_refused_list.next_page_number }}">Next</a>
+                                            </li>
+                                        {% endif %}
                                     </ul>
                                 </div>
                             </div>
@@ -136,6 +151,20 @@
                                                 {% endif %}
                                             </li>
                                         {% endfor %}
+                                    </ul>
+                                <ul class="pager">
+                                        {% if approve_passed_list.has_previous %}
+                                            <li>
+                                                <a href="?page_3={{ approve_passed_list.previous_page_number }}">Previous</a>
+                                            </li>
+                                        {% endif %}
+                                        <li>Page {{ approve_passed_list.number }}
+                                            of {{ approve_passed_list.paginator.num_pages }}.
+                                        </li>
+                                        {% if approve_passed_list.has_next %}
+                                            <li><a href="?page_3={{ approve_passed_list.next_page_number }}">Next</a>
+                                            </li>
+                                        {% endif %}
                                     </ul>
                                 </div>
                             </div>
@@ -251,28 +280,6 @@
             </div>
         </div>
     </div>
-
-{#    <div class="modal inmodal fade" id="sheetRefuseReasonModal" tabindex="-1" role="dialog"#}
-{#         aria-labelledby="addModalLabel"#}
-{#         aria-hidden="true">#}
-{#        <div class="modal-dialog modal-lg">#}
-{#            <div class="modal-content animated fadeIn">#}
-{#                <div class="modal-header">#}
-{#                    <button type="button" class="close" data-dismiss="modal"><span#}
-{#                            aria-hidden="true">×</span><span class="sr-only">Close</span></button>#}
-{#                    <i class="fa fa-times modal-icon"></i>#}
-{#                    <h4 class="modal-title" id="minion_old">拒绝原因</h4>#}
-{#                </div>#}
-{#                <div class="modal-body" id="refuse_reason_modal">#}
-{##}
-{#                </div>#}
-{#                <div class="modal-footer">#}
-{#                    <button type="button" class="btn btn-white" data-dismiss="modal">关闭</button>#}
-{#                    </button>#}
-{#                </div>#}
-{#            </div>#}
-{#        </div>#}
-{#    </div>#}
 
 
     <div class="modal inmodal fade" id="AprroveDetailModal" tabindex="-1" role="dialog"

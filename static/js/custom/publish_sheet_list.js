@@ -1,106 +1,10 @@
-function get_reboot_services(project_name, env_id) {
-    $('#reboot_services_choice').val(null).trigger('change');
-    $('#reboot_services_choice').empty();
-    $('#reboot_services_choice').on("removed", function () {
-    });
-    let old_obj = document.getElementById('reboot_services_choice');
-    old_obj.options.length = 0;
-    $.getJSON("/asset/getProjectList", {"project": project_name, "env": env_id}, function (result) {
-        console.log(result);
-        console.log(result.length);
-        for (let i = 0; i < result.length; i++) {
-            let newOption = new Option(result[i], result[i], false, false);
-            $('#reboot_services_choice').append(newOption).trigger('change');
-        }
-    });
-}
-
-
-function init_tab3() {
-    $("#if_review2").click(function () {
-        $("#review_select").val(null).trigger('change');
-        $("#review_select").prop("disabled", true);
-    });
-
-    $("#if_review1").click(function () {
-        $("#review_select").prop("disabled", false);
-    });
-
-    let project_name = $('#project_name').val();
-    $('#datepicker').parent().datepicker({
-        autoclose: true,
-        todayHighlight: true,
-        format: "yyyy-mm-dd",
-        language: "zh-CN",
-        startDate: "today",
-    });
-
-    $('#publish_time').timepicker({
-        minuteStep: 5,
-        showMeridian: false,   // 24hr mode
-        defaultTime: '12:00',
-    });
-
-    $('#project_name').select2({
-        placeholder: '请选择',
-    });
-
-    $('#qa_select').select2({
-        placeholder: '请选择',
-        allowClear: true
-    });
-    $('#review_select').select2({
-        placeholder: '请选择',
-        allowClear: true
-    });
-
-    $('#project_name').on("change", function () {
-        let project_name = $(this).val();
-        let env_id = $('#env_id').val();
-        get_reboot_services(project_name, env_id);
-    });
-
-    $('#env_id').select2({
-        minimumResultsForSearch: Infinity,
-        placeholder: '请选择',
-    });
-
-    $('#env_id').on("change", function () {
-        let project_name = $('#project_name').val();
-        let env_id = $(this).val();
-        get_reboot_services(project_name, env_id);
-    });
-
-    $('#reboot_services_choice').select2({
-        allowClear: true,
-        maximumSelectionLength: 4,
-        minimumResultsForSearch: Infinity,
-        language: 'zh-CN',
-        width: '100%',
-        placeholder: '请选择',
-    });
-    $('#reboot_services_choice').val(null).trigger('change');
-    $('#reboot_services_choice').empty();
-
-    let env_id = $('#env_id').val();
-    get_reboot_services(project_name, env_id);
-}
-
-
-$('#createPublish').click(function () {
-    document.getElementById('createTab').style.display = '';
-    $("#publishSheet").removeClass("active");
-    $("#tab-2").removeClass("active");
-    $("#createTab").addClass("active");
-    $("#tab-3").addClass("active");
-    init_tab3();
-    document.getElementById('publishResult').style.display = 'none';
-    $("#publishResult").removeClass("active");
-    $("#tab-7").removeClass("active");
+$(document).ready(function () {
+    $("#publishSheet").addClass("active");
+    $("#tab-2").addClass("active");
 });
 
 function delete_publishsheet(sheet_id) {
-    let url = '/asset/publishsheet/delete/';
+    let url = '/asset/project/publishsheet/delete/';
     let data = {
         'sheet_id': sheet_id,
     };
@@ -134,7 +38,7 @@ function delete_publishsheet(sheet_id) {
 }
 
 function sheetRefuseReasonDetail(sheet_id) {
-    let url = '/asset/publishsheet/reason/?sheet_id=' + sheet_id;
+    let url = '/asset/project/publishsheet/reason/?sheet_id=' + sheet_id;
     $.ajax({
         url: url,
         type: "GET",
@@ -151,7 +55,7 @@ function sheetRefuseReasonDetail(sheet_id) {
 
 function sheet_detail(sheet_id) {
     // 可以发布的单子
-    let url = '/asset/publishsheet/detail/?sheet_id=' + sheet_id + '&can_publish=1';
+    let url = '/asset/project/publishsheet/detail/?sheet_id=' + sheet_id + '&can_publish=1';
     $.ajax({
         url: url,
         type: "GET",
@@ -167,7 +71,7 @@ function sheet_detail(sheet_id) {
 }
 
 function publish_sheet_detail(sheet_id, can_delete=2) {
-    let url = '/asset/publishsheet/detail/?sheet_id=' + sheet_id + '&can_publish=2&can_delete=' + can_delete ;
+    let url = '/asset/project/publishsheet/detail/?sheet_id=' + sheet_id + '&can_publish=2&can_delete=' + can_delete ;
     $.ajax({
         url: url,
         type: "GET",
@@ -183,7 +87,7 @@ function publish_sheet_detail(sheet_id, can_delete=2) {
 }
 
 function start_publish(sheet_id) {
-    let url = '/asset/publishsheet/publish/start/?sheet_id='+sheet_id;
+    let url = '/asset/project/publishsheet/publish/start/?sheet_id='+sheet_id;
     $.ajax({
         url: url,
         type: "GET",
@@ -219,17 +123,3 @@ function init_tab7() {
     $("#tab-7").addClass("active");
 }
 
-function see_publish_result(sheet_id) {
-    let url = '/asset/publishsheet/publish/result/?sheet_id='+sheet_id;
-    $.ajax({
-        url: url,
-        type: "GET",
-        success: function (result) {
-            init_tab7();
-            $("#publish_result").html(result);
-        },
-        error: function () {
-            alert('失败');
-        }
-    });
-}

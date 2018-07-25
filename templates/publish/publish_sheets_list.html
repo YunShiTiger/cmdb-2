@@ -1,189 +1,248 @@
-<div class="col-lg-4">
-    <div class="ibox">
-        <div class="ibox-content">
-            <div class="text-center">
-                <h3>待审批
-                </h3>
-                <p class="small"><i class="fa fa-clock-o"></i> 请等待审批 &nbsp;&nbsp;&nbsp;&nbsp;
-                    <button type="button" class="btn btn-rounded btn-sm btn-success" id="createPublish">
-                        <i class="fa fa-plus"></i> 创建
+{% extends 'base.html' %}
+{% include 'link_css.html' %}
+{% block self_head_css_js %}
+    {#    <link href="/static/alert/chosen.min.css" rel="stylesheet">#}
+    <link href="/static/css/new_style.css" rel="stylesheet">
+    <link href="/static/alert/select2.min.css" rel="stylesheet">
+    <link href="/static/css/plugins/timepicker/bootstrap-timepicker.min.css" rel="stylesheet">
+    <link href="/static/css/plugins/datepicker/datepicker3.css" rel="stylesheet">
+{% endblock %}
+{% block self_footer_js %}
+    {#    <script src="/static/alert/chosen.jquery.min.js"></script>#}
+    <script src="/static/alert/select2.min.js"></script>
+    <script src="/static/js/timepicker/bootstrap-timepicker.js"></script>
+    <script src="/static/js/datapicker/bootstrap-datepicker.js"></script>
+{% endblock %}
+{% block content %}
+    <div class="tabs-container">
+        <ul class="nav nav-tabs">
+            <li id="projectInfo" class=""><a href="/asset/project/init/list/">项目初始化</a></li>
+            <li id="approvalLevelList" class=""><a href="/asset/project/level/list/">审批级别</a></li>
+            <li id="initTemplate" class="" style="display: none"><a href="/asset/project/template/list/">通用模板</a></li>
+            <li id="publishSheet" class="active"><a href="/asset/project/publishsheet/list/">发布单</a></li>
+            <li id="createTab" class="" style="display: none"><a data-toggle="tab" href="#tab-3">创建发布单</a></li>
+            <li id="doneSheet" class=""><a href="/asset/project/publishsheet/list/done/">完成&作废</a></li>
+            <li id="publishResult" class="" style="display: none"><a href="/asset/project/publishsheet/publish/result/">发布结果</a></li>
+        </ul>
+        <div class="tab-content">
+
+            <div id="tab-2" class="tab-pane">
+                <div class="wrapper wrapper-content animated fadeInRight">
+
+                    <div class="row" id="publish_sheet">
+                        <div class="col-lg-4">
+                            <div class="ibox">
+                                <div class="ibox-content">
+                                    <div class="text-center">
+                                        <h3>待审批
+                                        </h3>
+                                        <p class="small"><i class="fa fa-clock-o"></i> 请等待审批 &nbsp;&nbsp;&nbsp;&nbsp;
+                                            <button type="button" class="btn btn-rounded btn-sm btn-success"
+                                                    id="createPublish" onclick="window.location.href='/asset/project/publishsheet/create/init/'">
+                                                <i class="fa fa-plus"></i> 创建
+                                            </button>
+                                        </p>
+                                    </div>
+
+                                    <ul class="sortable-list connectList agile-list ui-sortable" id="to_be_approved">
+                                        {% for sheet in tobe_approved_list %}
+                                            <li class="info-element" id="{{ sheet.id }}" data-toggle="modal"
+                                                data-target="#publishDetailModal"
+                                                onclick="publish_sheet_detail('{{ sheet.id }}', '1')">
+                                                <i class="fa fa-clock-o"></i> {{ sheet.publish_date }} {{ sheet.publish_time }}<br>
+                                                创建人：{{ sheet.creator }}<br>
+                                                项目：{{ sheet.gogroup }}<br>
+                                                环境：{{ sheet.env }}<br>
+                                                重启服务：{{ sheet.services_str }}<br>
+                                                TAPD URL：{{ sheet.tapd_url }}<br>
+
+                                                {% if sheet.approve_level == '1' %}
+                                                    审批级别：<span>{{ sheet.level }}</span>
+                                                {% elif sheet.approve_level == '2' %}
+                                                    审批级别：<span style="color: #0e9aef">{{ sheet.level }}</span><br>
+                                                    一级审批人：<span>{{ sheet.first_str }}</span>
+                                                {% elif sheet.approve_level == '3' %}
+                                                    审批级别：<span style="color: orange">{{ sheet.level }}</span><br>
+                                                    一级审批人：<span>{{ sheet.first_str }}</span><br>
+                                                    二级审批人：<span>{{ sheet.second_str }}</span>
+                                                {% endif %}
+
+
+                                                {#                        事前SQL：{{ sheet.sql_before }}<br>#}
+                                                {#                        事后SQL：{{ sheet.sql_after }}<br>#}
+                                                {#                        CONSUL KEY：{{ sheet.consul_key }}#}
+                                            </li>
+                                        {% endfor %}
+
+                                    </ul>
+                                    <ul class="pager">
+                                        {% if tobe_approved_list.has_previous %}
+                                            <li>
+                                                <a href="?page_1={{ tobe_approved_list.previous_page_number }}">Previous</a>
+                                            </li>
+                                        {% endif %}
+                                        <li>Page {{ tobe_approved_list.number }}
+                                            of {{ tobe_approved_list.paginator.num_pages }}.
+                                        </li>
+                                        {% if tobe_approved_list.has_next %}
+                                            <li><a href="?page_1={{ tobe_approved_list.next_page_number }}">Next</a></li>
+                                        {% endif %}
+                                    </ul>
+
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-4">
+                            <div class="ibox">
+                                <div class="ibox-content">
+                                    <div class="text-center">
+                                        <h3>审批拒绝</h3>
+                                        <p class="small" style="color: #ed5565"><i class="fa fa-warning"></i>
+                                            如有需要，请重新提交发布单</p>
+                                    </div>
+                                    <ul class="sortable-list connectList agile-list ui-sortable"
+                                        id="approve_refused">
+                                        {% for sheet in approve_refused_list %}
+                                            <li class="danger-element" data-toggle="modal"
+                                                data-target="#publishDetailModal"
+                                                onclick="publish_sheet_detail('{{ sheet.id }}')">
+                                                <i class="fa fa-clock-o"></i> {{ sheet.publish_date }} {{ sheet.publish_time }}<br>
+                                                创建人：{{ sheet.creator }}<br>
+                                                项目：{{ sheet.gogroup }}<br>
+                                                环境：{{ sheet.env }}<br>
+                                                重启服务：{{ sheet.services_str }}<br>
+                                                TAPD URL：{{ sheet.tapd_url }}<br>
+
+                                                {% if sheet.approve_level == '1' %}
+                                                    审批级别：<span>{{ sheet.level }}</span>
+                                                {% elif sheet.approve_level == '2' %}
+                                                    审批级别：<span style="color: #0e9aef">{{ sheet.level }}</span><br>
+                                                    一级审批人：<span>{{ sheet.first_str }}</span>
+                                                {% elif sheet.approve_level == '3' %}
+                                                    审批级别：<span style="color: orange">{{ sheet.level }}</span><br>
+                                                    一级审批人：<span>{{ sheet.first_str }}</span><br>
+                                                    二级审批人：<span>{{ sheet.second_str }}</span>
+                                                {% endif %}
+
+                                            </li>
+                                        {% endfor %}
+                                    </ul>
+                                    <ul class="pager">
+                                        {% if approve_refused_list.has_previous %}
+                                            <li><a href="?page_2={{ approve_refused_list.previous_page_number }}">Previous</a>
+                                            </li>
+                                        {% endif %}
+                                        <li>Page {{ approve_refused_list.number }}
+                                            of {{ approve_refused_list.paginator.num_pages }}.
+                                        </li>
+                                        {% if approve_refused_list.has_next %}
+                                            <li><a href="?page_2={{ approve_refused_list.next_page_number }}">Next</a>
+                                            </li>
+                                        {% endif %}
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-4">
+                            <div class="ibox">
+                                <div class="ibox-content">
+                                    <div class="text-center">
+                                        <h3>无需审批/审批通过，待发布</h3>
+                                        <p class="small" style="color: darkorange"><i class="fa fa-warning"></i>
+                                            审批完成，请按时完成发布</p>
+                                    </div>
+                                    <ul class="sortable-list connectList agile-list ui-sortable"
+                                        id="approve_passed">
+                                        {% for sheet in approve_passed_list %}
+                                            <li {% if sheet.can_publish %}
+                                                class="success-element"
+                                            {% else %}
+                                                class="warning-element"
+                                            {% endif %}
+                                                data-toggle="modal" data-target="#publishDetailModal"
+                                                    {% if sheet.can_publish %}
+                                                onclick="sheet_detail('{{ sheet.id }}')"
+                                                    {% else %}
+                                                onclick="publish_sheet_detail('{{ sheet.id }}')"
+                                                    {% endif %}
+                                            >
+                                                <i class="fa fa-clock-o"></i> {{ sheet.publish_date }} {{ sheet.publish_time }}<br>
+                                                创建人：{{ sheet.creator }}<br>
+                                                项目：{{ sheet.gogroup }}<br>
+                                                环境：{{ sheet.env }}<br>
+                                                重启服务：{{ sheet.services_str }}<br>
+                                                TAPD URL：{{ sheet.tapd_url }}<br>
+
+                                                {% if sheet.approve_level == '1' %}
+                                                    审批级别：<span>{{ sheet.level }}</span>
+                                                {% elif sheet.approve_level == '2' %}
+                                                    审批级别：<span style="color: #0e9aef">{{ sheet.level }}</span><br>
+                                                    一级审批人：<span>{{ sheet.first_str }}</span>
+                                                {% elif sheet.approve_level == '3' %}
+                                                    审批级别：<span style="color: orange">{{ sheet.level }}</span><br>
+                                                    一级审批人：<span>{{ sheet.first_str }}</span><br>
+                                                    二级审批人：<span>{{ sheet.second_str }}</span>
+                                                {% endif %}
+
+                                            </li>
+                                        {% endfor %}
+                                    </ul>
+                                    <ul class="pager">
+                                        {% if approve_passed_list.has_previous %}
+                                            <li>
+                                                <a href="?page_3={{ approve_passed_list.previous_page_number }}">Previous</a>
+                                            </li>
+                                        {% endif %}
+                                        <li>Page {{ approve_passed_list.number }}
+                                            of {{ approve_passed_list.paginator.num_pages }}.
+                                        </li>
+                                        {% if approve_passed_list.has_next %}
+                                            <li><a href="?page_3={{ approve_passed_list.next_page_number }}">Next</a>
+                                            </li>
+                                        {% endif %}
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+
+    <div class="modal inmodal fade" id="sheetRefuseReasonModal" tabindex="-1" role="dialog"
+         aria-labelledby="addModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content animated fadeIn">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal"><span
+                            aria-hidden="true">×</span><span class="sr-only">Close</span></button>
+                    <i class="fa fa-times modal-icon" style="color: red"></i>
+                    <h4 class="modal-title" id="minion_old">拒绝原因</h4>
+                </div>
+                <div class="modal-body" id="refuse_reason_modal">
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-white" data-dismiss="modal">关闭</button>
+                    {#                <button type="button" class="btn btn-primary" id="modifyCrontabButton">保存#}
                     </button>
-                </p>
-            </div>
-
-            <ul class="sortable-list connectList agile-list ui-sortable" id="to_be_approved">
-                {% for sheet in tobe_approved_list %}
-                    <li class="info-element" id="{{ sheet.id }}" data-toggle="modal" data-target="#publishDetailModal"
-                        onclick="publish_sheet_detail('{{ sheet.id }}', '1')">
-                        <i class="fa fa-clock-o"></i> {{ sheet.publish_date }} {{ sheet.publish_time }}<br>
-                        创建人：{{ sheet.creator }}<br>
-                        项目：{{ sheet.gogroup }}<br>
-                        环境：{{ sheet.env }}<br>
-                        重启服务：{{ sheet.services_str }}<br>
-                        TAPD URL：{{ sheet.tapd_url }}<br>
-
-                        {% if sheet.approve_level == '1' %}
-                            审批级别：<span>{{ sheet.level }}</span>
-                        {% elif sheet.approve_level == '2' %}
-                            审批级别：<span style="color: #0e9aef">{{ sheet.level }}</span><br>
-                            一级审批人：<span>{{ sheet.first_str }}</span>
-                        {% elif sheet.approve_level == '3' %}
-                            审批级别：<span style="color: orange">{{ sheet.level }}</span><br>
-                            一级审批人：<span>{{ sheet.first_str }}</span><br>
-                            二级审批人：<span>{{ sheet.second_str }}</span>
-                        {% endif %}
-
-
-                        {#                        事前SQL：{{ sheet.sql_before }}<br>#}
-                        {#                        事后SQL：{{ sheet.sql_after }}<br>#}
-                        {#                        CONSUL KEY：{{ sheet.consul_key }}#}
-                    </li>
-                {% endfor %}
-
-            </ul>
-            <ul class="pager">
-                {% if tobe_approved_list.has_previous %}
-                    <li><a href="?page1={{ tobe_approved_list.previous_page_number }}">Previous</a></li>
-                {% endif %}
-                <li>Page {{ tobe_approved_list.number }} of {{ tobe_approved_list.paginator.num_pages }}.</li>
-                {% if tobe_approved_list.has_next %}
-                    <li><a href="?page1={{ tobe_approved_list.next_page_number }}">Next</a></li>
-                {% endif %}
-            </ul>
-
-        </div>
-    </div>
-</div>
-<div class="col-lg-4">
-    <div class="ibox">
-        <div class="ibox-content">
-            <div class="text-center">
-                <h3>审批拒绝</h3>
-                <p class="small" style="color: #ed5565"><i class="fa fa-warning"></i> 如有需要，请重新提交发布单</p>
-            </div>
-            <ul class="sortable-list connectList agile-list ui-sortable"
-                id="approve_refused">
-                {% for sheet in approve_refused_list %}
-                    <li class="danger-element" data-toggle="modal" data-target="#publishDetailModal"
-                        onclick="publish_sheet_detail('{{ sheet.id }}')">
-                        <i class="fa fa-clock-o"></i> {{ sheet.publish_date }} {{ sheet.publish_time }}<br>
-                        创建人：{{ sheet.creator }}<br>
-                        项目：{{ sheet.gogroup }}<br>
-                        环境：{{ sheet.env }}<br>
-                        重启服务：{{ sheet.services_str }}<br>
-                        TAPD URL：{{ sheet.tapd_url }}<br>
-
-                        {% if sheet.approve_level == '1' %}
-                            审批级别：<span>{{ sheet.level }}</span>
-                        {% elif sheet.approve_level == '2' %}
-                            审批级别：<span style="color: #0e9aef">{{ sheet.level }}</span><br>
-                            一级审批人：<span>{{ sheet.first_str }}</span>
-                        {% elif sheet.approve_level == '3' %}
-                            审批级别：<span style="color: orange">{{ sheet.level }}</span><br>
-                            一级审批人：<span>{{ sheet.first_str }}</span><br>
-                            二级审批人：<span>{{ sheet.second_str }}</span>
-                        {% endif %}
-
-                    </li>
-                {% endfor %}
-            </ul>
-            <ul class="pager">
-                {% if approve_refused_list.has_previous %}
-                    <li><a href="?page2={{ approve_refused_list.previous_page_number }}">Previous</a></li>
-                {% endif %}
-                <li>Page {{ approve_refused_list.number }} of {{ approve_refused_list.paginator.num_pages }}.</li>
-                {% if approve_refused_list.has_next %}
-                    <li><a href="?page2={{ approve_refused_list.next_page_number }}">Next</a></li>
-                {% endif %}
-            </ul>
-        </div>
-    </div>
-</div>
-<div class="col-lg-4">
-    <div class="ibox">
-        <div class="ibox-content">
-            <div class="text-center">
-                <h3>无需审批/审批通过，待发布</h3>
-                <p class="small" style="color: darkorange"><i class="fa fa-warning"></i> 审批完成，请按时完成发布</p>
-            </div>
-            <ul class="sortable-list connectList agile-list ui-sortable"
-                id="approve_passed">
-                {% for sheet in approve_passed_list %}
-                    <li {% if sheet.can_publish %}
-                        class="success-element"
-                    {% else %}
-                        class="warning-element"
-                    {% endif %}
-                        data-toggle="modal" data-target="#publishDetailModal"
-                            {% if sheet.can_publish %}
-                        onclick="sheet_detail('{{ sheet.id }}')"
-                            {% else %}
-                        onclick="publish_sheet_detail('{{ sheet.id }}')"
-                            {% endif %}
-                    >
-                        <i class="fa fa-clock-o"></i> {{ sheet.publish_date }} {{ sheet.publish_time }}<br>
-                        创建人：{{ sheet.creator }}<br>
-                        项目：{{ sheet.gogroup }}<br>
-                        环境：{{ sheet.env }}<br>
-                        重启服务：{{ sheet.services_str }}<br>
-                        TAPD URL：{{ sheet.tapd_url }}<br>
-
-                        {% if sheet.approve_level == '1' %}
-                            审批级别：<span>{{ sheet.level }}</span>
-                        {% elif sheet.approve_level == '2' %}
-                            审批级别：<span style="color: #0e9aef">{{ sheet.level }}</span><br>
-                            一级审批人：<span>{{ sheet.first_str }}</span>
-                        {% elif sheet.approve_level == '3' %}
-                            审批级别：<span style="color: orange">{{ sheet.level }}</span><br>
-                            一级审批人：<span>{{ sheet.first_str }}</span><br>
-                            二级审批人：<span>{{ sheet.second_str }}</span>
-                        {% endif %}
-
-                    </li>
-                {% endfor %}
-            </ul>
-            <ul class="pager">
-                {% if approve_passed_list.has_previous %}
-                    <li><a href="?page3={{ approve_passed_list.previous_page_number }}">Previous</a></li>
-                {% endif %}
-                <li>Page {{ approve_passed_list.number }} of {{ approve_passed_list.paginator.num_pages }}.</li>
-                {% if approve_passed_list.has_next %}
-                    <li><a href="?page3={{ approve_passed_list.next_page_number }}">Next</a></li>
-                {% endif %}
-            </ul>
-        </div>
-    </div>
-</div>
-
-<div class="modal inmodal fade" id="sheetRefuseReasonModal" tabindex="-1" role="dialog"
-     aria-labelledby="addModalLabel"
-     aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content animated fadeIn">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal"><span
-                        aria-hidden="true">×</span><span class="sr-only">Close</span></button>
-                <i class="fa fa-times modal-icon" style="color: red"></i>
-                <h4 class="modal-title" id="minion_old">拒绝原因</h4>
-            </div>
-            <div class="modal-body" id="refuse_reason_modal">
-
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-white" data-dismiss="modal">关闭</button>
-                {#                <button type="button" class="btn btn-primary" id="modifyCrontabButton">保存#}
-                </button>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
-<div class="modal inmodal fade" id="publishDetailModal" tabindex="-1" role="dialog"
-     aria-labelledby="addModalLabel"
-     aria-hidden="true">
-    <div class="modal-dialog modal-lg" id="sheet_detail_modal">
+    <div class="modal inmodal fade" id="publishDetailModal" tabindex="-1" role="dialog"
+         aria-labelledby="addModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog modal-lg" id="sheet_detail_modal">
 
+        </div>
     </div>
-</div>
 
-<script src="/static/js/custom/publish_sheet_list.js"></script>
+    <script src="/static/js/custom/publish_sheet_list.js"></script>
+
+{% endblock %}

@@ -1,73 +1,26 @@
+$(document).ready(function () {
+    document.getElementById('doneSheet').style.display = '';
+    $("#doneSheet").addClass("active");
+    $("#tab-4").addClass("active");
+});
 
-function get_reboot_services(project_name, env_id) {
-    $('#reboot_services_choice').val(null).trigger('change');     $('#reboot_services_choice').empty();
-    $('#reboot_services_choice').on("removed", function () {
-    });
-    let old_obj = document.getElementById('reboot_services_choice');
-    old_obj.options.length = 0;
-    $.getJSON("/asset/getProjectList", {"project": project_name, "env": env_id}, function (result) {
-        console.log(result);
-        console.log(result.length);
-        for (let i = 0; i < result.length; i++) {
-            let newOption = new Option(result[i], result[i], false, false);
-            $('#reboot_services_choice').append(newOption).trigger('change');
+function see_publish_result(sheet_id) {
+    let url = '/asset/project/publishsheet/publish/result/?sheet_id='+sheet_id;
+    $.ajax({
+        url: url,
+        type: "GET",
+        success: function (result) {
+            init_tab7();
+            $("#publish_result").html(result);
+        },
+        error: function () {
+            alert('失败');
         }
     });
 }
 
-
-function init_tab3() {
-    $('#datepicker').parent().datepicker({
-        autoclose: true,
-        todayHighlight: true,
-        format: "yyyy-mm-dd",
-        language: "zh-CN",
-        startDate: "today",
-    });
-
-    $('#publish_time').timepicker({
-        minuteStep: 5,
-        showMeridian: false,   // 24hr mode
-        defaultTime: '12:00',
-    });
-
-    $('#project_name').select2({
-        placeholder: '请选择',
-    });
-
-    $('#project_name').on("change", function () {
-        let project_name = $(this).val();
-        let env_id = $('#env_id').val();
-        get_reboot_services(project_name, env_id);
-    });
-
-    $('#env_id').select2({
-        minimumResultsForSearch: Infinity,
-        placeholder: '请选择',
-    });
-
-    $('#env_id').on("change", function () {
-        let project_name = $('#project_name').val();
-        let env_id = $(this).val();
-        get_reboot_services(project_name, env_id);
-    });
-
-    $('#reboot_services_choice').select2({
-        allowClear: true,
-        maximumSelectionLength: 4,
-        minimumResultsForSearch: Infinity,
-        language: 'zh-CN',
-        width: '100%',
-        placeholder: '请选择',
-    });
-
-    let project_name = $('#project_name').val();
-    let env_id = $('#env_id').val();
-    get_reboot_services(project_name, env_id);
-}
-
 function done_sheet_detail(sheet_id) {
-    let url = '/asset/publishsheet/detail/?sheet_id=' + sheet_id + '&can_publish=2';
+    let url = '/asset/project/publishsheet/detail/?sheet_id=' + sheet_id + '&can_publish=2';
     $.ajax({
         url: url,
         type: "GET",
@@ -80,4 +33,26 @@ function done_sheet_detail(sheet_id) {
             alert('失败');
         }
     });
+}
+
+function init_tab7() {
+    document.getElementById('publishResult').style.display = '';
+    document.getElementById('createTab').style.display = 'none';
+    document.getElementById('doneSheet').style.display = 'none';
+    document.getElementById('initTemplate').style.display = 'none';
+    $("#projectInfo").removeClass("active");
+    $("#tab-1").removeClass("active");
+    $("#publishSheet").removeClass("active");
+    $("#tab-2").removeClass("active");
+    $("#createTab").removeClass("active");
+    $("#tab-3").removeClass("active");
+    $("#doneSheet").removeClass("active");
+    $("#tab-4").removeClass("active");
+    $("#initTemplate").removeClass("active");
+    $("#tab-5").removeClass("active");
+    $("#approvalLevelList").removeClass("active");
+    $("#tab-6").removeClass("active");
+
+    $("#publishResult").addClass("active");
+    $("#tab-7").addClass("active");
 }

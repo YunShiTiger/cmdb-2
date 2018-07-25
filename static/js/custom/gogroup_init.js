@@ -33,7 +33,7 @@ function init_tab1() {
 function init_tab2() {
     $('#reboot_services_choice').val(null).trigger('change');
     $('#reboot_services_choice').empty();
-    let url = '/asset/publishsheet/list/';
+    let url = '/asset/project/publishsheet/list/';
     $.ajax({
         url: url,
         type: "GET",
@@ -149,100 +149,6 @@ $('#create_projectinfo').click(function () {
     });
 });
 
-function sendValue(timeslot_id) {
-    $("#timeslot_id").val(timeslot_id);
-
-}
-
-$("#create_publishsheet").click(function () {
-    let project_name = $('#project_name').val();
-    let env_id = $('#env_id').val();
-    let tapd_url = $('#tapd_url').val();
-    let reboot_services_list = $('#reboot_services_choice').val();
-    let publish_date = $('#datepicker').datepicker('getData').val();
-    let publish_time = $('#publish_time').val();
-    let sql_before = $('#sql_before').val();
-    let sql_after = $('#sql_after').val();
-    let consul_key = $('#consul_key').val();
-
-    let qa_list = $('#qa_select').val();
-
-    let if_review = $("input[name='if_review']:checked").val();
-    let review_list = $('#review_select').val();
-    if (if_review === '1') {
-        if (!review_list) {
-            alert('请选择code review 人');
-            return false;
-        }
-    }
-    let if_browse = $("input[name='if_browse']:checked").val();
-    let if_order = $("input[name='if_order']:checked").val();
-    let if_buy = $("input[name='if_buy']:checked").val();
-    let comment = $('#comment').val();
-    let reason = $('#reason').val();
-
-    if (!project_name || !env_id || !reboot_services_list || !publish_date || !publish_time || !tapd_url || !sql_after || !sql_before || !consul_key || !qa_list) {
-        alert('必填内容不能为空');
-        return false;
-    }
-
-    if (tapd_url.match("tower.im") || tapd_url.match("tapd.cn")) {
-        console.log('url ok');
-    }
-    else {
-        alert('TAPD URL格式不正确');
-        return false;
-    }
-
-    let url = '/asset/publishsheet/create/';
-    let data = {
-        'project_name': project_name,
-        'env_id': env_id,
-        'tapd_url': tapd_url,
-        'reboot_services_list': reboot_services_list,
-        'publish_date': publish_date,
-        'publish_time': publish_time,
-        'sql_before': sql_before,
-        'sql_after': sql_after,
-        'consul_key': consul_key,
-        'qa_list': qa_list,
-        'if_review': if_review,
-        'review_list': review_list,
-        'reason': reason,
-        'comment': comment,
-        'if_browse': if_browse,
-        'if_order': if_order,
-        'if_buy': if_buy
-    };
-    console.log(data);
-    $.ajax({
-        url: url,
-        type: "POST",
-        data: data,
-        contentType: 'application/x-www-form-urlencoded',
-        traditional: true,
-        beforeSend: function () {
-            // 禁用按钮防止重复提交
-            $("#create_publishsheet").attr({disabled: "disabled"});
-            $("#page_loading").show();
-        },
-        success: function (result) {
-            if (result.code === 0) {
-                window.location.reload();
-            }
-            else {
-                alert(result.msg);
-                $("#create_publishsheet").removeAttr("disabled");
-            }
-            $("#page_loading").hide();
-        },
-        error: function () {
-            alert('失败');
-            $("#create_publishsheet").removeAttr("disabled");
-            $("#page_loading").hide();
-        }
-    });
-});
 
 $("#done_sheets").click(function () {
     document.getElementById('createTab').style.display = 'none';
@@ -271,7 +177,7 @@ $("#done_sheets").click(function () {
 function init_tab4() {
     $('#reboot_services_choice').val(null).trigger('change');
     $('#reboot_services_choice').empty();
-    let url = '/asset/publishsheet/list/done/';
+    let url = '/asset/project/publishsheet/list/done/';
     $.ajax({
         url: url,
         type: "GET",
@@ -291,51 +197,6 @@ function init_tab4() {
     });
 }
 
-$("#template_init").click(function () {
-    document.getElementById('createTab').style.display = 'none';
-    document.getElementById('doneSheet').style.display = 'none';
-    document.getElementById('publishResult').style.display = 'none';
-    document.getElementById('initTemplate').style.display = '';
-    $("#projectInfo").removeClass("active");
-    $("#tab-1").removeClass("active");
-    $("#publishSheet").removeClass("active");
-    $("#tab-2").removeClass("active");
-    $("#createTab").removeClass("active");
-    $("#tab-3").removeClass("active");
-    $("#doneSheet").removeClass("active");
-    $("#tab-4").removeClass("active");
-
-    $("#initTemplate").addClass("active");
-    $("#tab-5").addClass("active");
-    init_tab5();
-    $("#approvalLevelList").removeClass("active");
-    $("#tab-6").removeClass("active");
-    $("#publishResult").removeClass("active");
-    $("#tab-7").removeClass("active");
-});
-
-function init_tab5() {
-    $('#reboot_services_choice').val(null).trigger('change');
-    $('#reboot_services_choice').empty();
-    let url = '/asset/project/template/list/';
-    $.ajax({
-        url: url,
-        type: "GET",
-        beforeSend: function () {
-            $("#page_loading").show();
-        },
-        success: function (result) {
-            if (result.length > 0) {
-                $("#init_template").html(result);
-            }
-            $("#page_loading").hide();
-        },
-        error: function () {
-            alert('失败');
-            $("#page_loading").hide();
-        }
-    });
-}
 
 $("#approvalLevelList").click(function () {
     document.getElementById('createTab').style.display = 'none';
@@ -401,13 +262,14 @@ function delete_projectinfo(projectinfo_id) {
         },
         success: function (result) {
             if (result.code === 0) {
-                $("#" + projectinfo_id).remove();
+                console.log('delete project info ok');
             }
             else {
                 alert(result.msg);
             }
+            window.location.reload();
             $("#deleteProjectButton").removeAttr("disabled");
-            $("#deleteProjectModal").modal('hide');
+            $("#deleteProjectModal_"+projectinfo_id).modal('hide');
         },
         error: function () {
             alert('失败');

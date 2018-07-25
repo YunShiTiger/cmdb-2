@@ -1,4 +1,8 @@
 $(document).ready(function () {
+    document.getElementById('initTemplate').style.display = '';
+    $("#initTemplate").addClass("active");
+    $("#tab-5").addClass("active");
+
     init_approval_level();
 });
 

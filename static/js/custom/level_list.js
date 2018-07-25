@@ -1,7 +1,8 @@
 $(document).ready(function () {
+    $("#approvalLevelList").addClass("active");
+    $("#tab-6").addClass("active");
     init_add_button();
     init_page();
-    init_approval_level();
     $("#optionsRadios1").click(function () {
         $('#level_select2').html("");
         $('#add_button').html("<button type='button' class='btn btn-sm btn-success m-t-n-xs'\n" +
@@ -22,11 +23,6 @@ function init_page() {
         placeholder: '请选择',
         allowClear: true
     });
-
-
-}
-
-function init_approval_level() {
     $('.weekday-start').select2({
         minimumResultsForSearch: Infinity,
         language: 'zh-CN',
@@ -59,7 +55,7 @@ function init_add_button() {
     $('#add_level_select2').click(function () {
         let level_obj = document.getElementsByClassName("select-level");
         init_custom();
-        init_approval_level();
+        init_page();
         $('.close-level-set').click(function () {
             let content = $(this).closest('div.ibox');
             if (level_obj.length !== 1) {
@@ -176,7 +172,7 @@ function init_custom() {
 
 
     $('#level_select2').append(append_str);
-    init_approval_level();
+    init_page();
 }
 
 $("#create_level").click(function () {
@@ -311,3 +307,49 @@ function levelDetail(timeslot_id) {
     });
 
 }
+
+// $("#template_init").click(function () {
+//     document.getElementById('createTab').style.display = 'none';
+//     document.getElementById('doneSheet').style.display = 'none';
+//     document.getElementById('publishResult').style.display = 'none';
+//     document.getElementById('initTemplate').style.display = '';
+//     $("#projectInfo").removeClass("active");
+//     $("#tab-1").removeClass("active");
+//     $("#publishSheet").removeClass("active");
+//     $("#tab-2").removeClass("active");
+//     $("#createTab").removeClass("active");
+//     $("#tab-3").removeClass("active");
+//     $("#doneSheet").removeClass("active");
+//     $("#tab-4").removeClass("active");
+//
+//     $("#initTemplate").addClass("active");
+//     $("#tab-5").addClass("active");
+//     init_tab5();
+//     $("#approvalLevelList").removeClass("active");
+//     $("#tab-6").removeClass("active");
+//     $("#publishResult").removeClass("active");
+//     $("#tab-7").removeClass("active");
+// });
+//
+// function init_tab5() {
+//     $('#reboot_services_choice').val(null).trigger('change');
+//     $('#reboot_services_choice').empty();
+//     let url = '/asset/project/template/list/';
+//     $.ajax({
+//         url: url,
+//         type: "GET",
+//         beforeSend: function () {
+//             $("#page_loading").show();
+//         },
+//         success: function (result) {
+//             if (result.length > 0) {
+//                 $("#init_template").html(result);
+//             }
+//             $("#page_loading").hide();
+//         },
+//         error: function () {
+//             alert('失败');
+//             $("#page_loading").hide();
+//         }
+//     });
+// }
