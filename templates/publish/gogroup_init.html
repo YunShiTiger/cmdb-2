@@ -177,6 +177,19 @@
                                             </div>
                                         {% endfor %}
                                     </ul>
+                                    <ul class="pager">
+                                        {% if project_list.has_previous %}
+                                            <li>
+                                                <a href="?page={{ project_list.previous_page_number }}">Previous</a>
+                                            </li>
+                                        {% endif %}
+                                        <li>Page {{ project_list.number }}
+                                            of {{ project_list.paginator.num_pages }}.
+                                        </li>
+                                        {% if project_list.has_next %}
+                                            <li><a href="?page={{ project_list.next_page_number }}">Next</a></li>
+                                        {% endif %}
+                                    </ul>
                                 </div>
                             </div>
                         </div>

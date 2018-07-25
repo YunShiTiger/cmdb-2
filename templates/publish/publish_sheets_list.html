@@ -41,15 +41,15 @@
                 {% endfor %}
 
             </ul>
-            {#            <ul class="pager">#}
-            {#                {% if tobe_approved_list.has_previous %}#}
-            {#                    <li><a href="?page1={{ tobe_approved_list.previous_page_number }}">Previous</a></li>#}
-            {#                {% endif %}#}
-            {#                <li>Page {{ tobe_approved_list.number }} of {{ tobe_approved_list.paginator.num_pages }}.</li>#}
-            {#                {% if tobe_approved_list.has_next %}#}
-            {#                    <li><a href="?page1={{ tobe_approved_list.next_page_number }}">Next</a></li>#}
-            {#                {% endif %}#}
-            {#            </ul>#}
+            <ul class="pager">
+                {% if tobe_approved_list.has_previous %}
+                    <li><a href="?page1={{ tobe_approved_list.previous_page_number }}">Previous</a></li>
+                {% endif %}
+                <li>Page {{ tobe_approved_list.number }} of {{ tobe_approved_list.paginator.num_pages }}.</li>
+                {% if tobe_approved_list.has_next %}
+                    <li><a href="?page1={{ tobe_approved_list.next_page_number }}">Next</a></li>
+                {% endif %}
+            </ul>
 
         </div>
     </div>
@@ -84,26 +84,18 @@
                             二级审批人：<span>{{ sheet.second_str }}</span>
                         {% endif %}
 
-                        {#                        事前SQL：{{ sheet.sql_before }}<br>#}
-                        {#                        事后SQL：{{ sheet.sql_after }}<br>#}
-                        {#                        CONSUL KEY：{{ sheet.consul_key }}<br>#}
-                        {#                        <div class="agile-detail">#}
-                        {#                            <a data-toggle="modal" data-target="#sheetRefuseReasonModal"#}
-                        {#                               class="pull-right btn btn-xs btn-danger"#}
-                        {#                               onclick="sheetRefuseReasonDetail('{{ sheet.id }}')">原因</a>#}
-                        {#                        </div>#}
                     </li>
                 {% endfor %}
             </ul>
-            {#            <ul class="pager">#}
-            {#                {% if approve_refused_list.has_previous %}#}
-            {#                    <li><a href="?page2={{ approve_refused_list.previous_page_number }}">Previous</a></li>#}
-            {#                {% endif %}#}
-            {#                <li>Page {{ approve_refused_list.number }} of {{ approve_refused_list.paginator.num_pages }}.</li>#}
-            {#                {% if approve_refused_list.has_next %}#}
-            {#                    <li><a href="?page2={{ approve_refused_list.next_page_number }}">Next</a></li>#}
-            {#                {% endif %}#}
-            {#            </ul>#}
+            <ul class="pager">
+                {% if approve_refused_list.has_previous %}
+                    <li><a href="?page2={{ approve_refused_list.previous_page_number }}">Previous</a></li>
+                {% endif %}
+                <li>Page {{ approve_refused_list.number }} of {{ approve_refused_list.paginator.num_pages }}.</li>
+                {% if approve_refused_list.has_next %}
+                    <li><a href="?page2={{ approve_refused_list.next_page_number }}">Next</a></li>
+                {% endif %}
+            </ul>
         </div>
     </div>
 </div>
@@ -147,35 +139,18 @@
                             二级审批人：<span>{{ sheet.second_str }}</span>
                         {% endif %}
 
-                        {#                        事前SQL：{{ sheet.sql_before }}<br>#}
-                        {#                        事后SQL：{{ sheet.sql_after }}<br>#}
-                        {#                        CONSUL KEY：{{ sheet.consul_key }}<br>#}
-
-                        {#                        {% if sheet.can_publish %}#}
-                        {#                            <div class="agile-detail">#}
-                        {#                                <a data-toggle="modal" data-target="#publishModal"#}
-                        {#                                   class="pull-right btn btn-xs btn-warning"#}
-                        {#                                   onclick="sheet_detail('{{ sheet.id }}')">发布</a>#}
-                        {#                            </div>#}
-                        {#                        {% else %}#}
-                        {#                            <div class="agile-detail">#}
-                        {#                                <a data-toggle="modal" data-target="#publishModal"#}
-                        {#                                   class="pull-right btn btn-xs btn-warning"#}
-                        {#                                   onclick="sheet_detail('{{ sheet.id }}')" disabled="">发布</a>#}
-                        {#                            </div>#}
-                        {#                        {% endif %}#}
                     </li>
                 {% endfor %}
             </ul>
-            {#            <ul class="pager">#}
-            {#                {% if approve_passed_list.has_previous %}#}
-            {#                    <li><a href="?page3={{ approve_passed_list.previous_page_number }}">Previous</a></li>#}
-            {#                {% endif %}#}
-            {#                <li>Page {{ approve_passed_list.number }} of {{ approve_passed_list.paginator.num_pages }}.</li>#}
-            {#                {% if approve_passed_list.has_next %}#}
-            {#                    <li><a href="?page3={{ approve_passed_list.next_page_number }}">Next</a></li>#}
-            {#                {% endif %}#}
-            {#            </ul>#}
+            <ul class="pager">
+                {% if approve_passed_list.has_previous %}
+                    <li><a href="?page3={{ approve_passed_list.previous_page_number }}">Previous</a></li>
+                {% endif %}
+                <li>Page {{ approve_passed_list.number }} of {{ approve_passed_list.paginator.num_pages }}.</li>
+                {% if approve_passed_list.has_next %}
+                    <li><a href="?page3={{ approve_passed_list.next_page_number }}">Next</a></li>
+                {% endif %}
+            </ul>
         </div>
     </div>
 </div>
@@ -202,14 +177,6 @@
         </div>
     </div>
 </div>
-{##}
-{#<div class="modal inmodal fade" id="publishModal" tabindex="-1" role="dialog"#}
-{#     aria-labelledby="addModalLabel"#}
-{#     aria-hidden="true">#}
-{#    <div class="modal-dialog modal-lg" id="sheet_modal">#}
-{##}
-{#    </div>#}
-{#</div>#}
 
 <div class="modal inmodal fade" id="publishDetailModal" tabindex="-1" role="dialog"
      aria-labelledby="addModalLabel"

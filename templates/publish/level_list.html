@@ -200,6 +200,20 @@
                     </div>
                 {% endfor %}
             </ul>
+
+            <ul class="pager">
+                {% if level_list.has_previous %}
+                    <li>
+                        <a href="?page={{ level_list.previous_page_number }}">Previous</a>
+                    </li>
+                {% endif %}
+                <li>Page {{ level_list.number }}
+                    of {{ level_list.paginator.num_pages }}.
+                </li>
+                {% if level_list.has_next %}
+                    <li><a href="?page={{ level_list.next_page_number }}">Next</a></li>
+                {% endif %}
+            </ul>
         </div>
     </div>
 </div>
