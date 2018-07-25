@@ -18,7 +18,7 @@ $("#approveList").click(function () {
 
 function agreeButton(publish_id) {
     let agree_text = "";
-    let url = "/asset/project/approve/judge/";
+    let url = "/asset/approve/judge/";
     let data = {
         'publish_id': publish_id,
         'approve': '1',
@@ -50,7 +50,7 @@ function refuseButton(publish_id) {
         alert("拒绝理由必填");
         return false;
     }
-    let url = "/asset/project/approve/judge/";
+    let url = "/asset/approve/judge/";
     let data = {
         'publish_id': publish_id,
         'approve': '2',

@@ -28,8 +28,8 @@ urlpatterns = patterns('',
                        url(r'^project/publishsheet/publish/start/$', StartPublish, name='StartPublish'),
                        url(r'^project/publishsheet/publish/result/$', PublishResult, name='PublishResult'),
 
-                       url(r'^project/approve/list/$', ApproveList, name='ApproveList'),
-                       url(r'^project/approve/init/$', ApproveInit, name='ApproveInit'),  # 单个审批单
-                       url(r'^project/approve/judge/$', ApproveJudge, name='ApproveJudge'),
-                       url(r'^project/approve/sheet/detail/$', ApproveSheetDetail, name='ApproveSheetDetail'),
+                       url(r'^approve/list/$', ApproveList, name='ApproveList'),
+                       url(r'^approve/init/$', ApproveInit, name='ApproveInit'),  # 单个审批单
+                       url(r'^approve/judge/$', ApproveJudge, name='ApproveJudge'),
+                       url(r'^approve/sheet/detail/$', ApproveSheetDetail, name='ApproveSheetDetail'),
                        )

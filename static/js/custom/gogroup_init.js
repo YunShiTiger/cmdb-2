@@ -55,7 +55,6 @@ function init_tab2() {
 
 $("#projectInfo").click(function () {
     document.getElementById('createTab').style.display = 'none';
-    document.getElementById('doneSheet').style.display = 'none';
     document.getElementById('initTemplate').style.display = 'none';
     document.getElementById('publishResult').style.display = 'none';
     $("#publishSheet").removeClass("active");
@@ -77,7 +76,6 @@ $("#projectInfo").click(function () {
 
 $("#publishSheet").click(function () {
     document.getElementById('createTab').style.display = 'none';
-    document.getElementById('doneSheet').style.display = 'none';
     document.getElementById('initTemplate').style.display = 'none';
     document.getElementById('publishResult').style.display = 'none';
     $("#projectInfo").removeClass("active");
@@ -153,7 +151,6 @@ $('#create_projectinfo').click(function () {
 $("#done_sheets").click(function () {
     document.getElementById('createTab').style.display = 'none';
     document.getElementById('initTemplate').style.display = 'none';
-    document.getElementById('doneSheet').style.display = '';
     $("#projectInfo").removeClass("active");
     $("#tab-1").removeClass("active");
     $("#publishSheet").removeClass("active");
@@ -200,7 +197,6 @@ function init_tab4() {
 
 $("#approvalLevelList").click(function () {
     document.getElementById('createTab').style.display = 'none';
-    document.getElementById('doneSheet').style.display = 'none';
     document.getElementById('initTemplate').style.display = 'none';
     document.getElementById('publishResult').style.display = 'none';
     $("#projectInfo").removeClass("active");

@@ -616,7 +616,7 @@ def PublishSheetList(request):
     data = dict(code=errcode, msg=msg, tobe_approved_list=tobe_approved_list, approve_refused_list=approve_refused_list,
                 approve_passed_list=approve_passed_list)
 
-    return render_to_response('publish/publish_sheets_list.html', data)
+    return render(request, 'publish/publish_sheets_list.html', data)
 
 
 @login_required
@@ -702,7 +702,7 @@ def PublishSheetDoneList(request):
                 outtime_notapprove_list=final_outtime_notapprove_list,
                 outtime_notpublish_list=final_outtime_notpublish_list)
 
-    return render_to_response('publish/publish_done.html', data)
+    return render(request, 'publish/publish_done.html', data)
 
 
 @login_required
@@ -1374,7 +1374,7 @@ def StartPublish(request):
         print 'StartPublish^^^^^^^^^^result^^^^^^^^^^^^^^^'
         print result
     data = dict(code=errcode, msg=msg, publish_result=result, publish_ok=publish_ok)
-    return render_to_response('publish/publish_result.html', data)
+    return render(request, 'publish/publish_result.html', data)
 
 
 @login_required
@@ -1390,12 +1390,12 @@ def PublishResult(request):
         errcode = 500
         msg = u'发布单不存在'
         data = dict(code=errcode, msg=msg)
-        return HttpResponse(json.dumps(data), content_type='application/json')
+        return render(request, 'publish/publish_result.html', data)
     else:
         result = eval(publishsheet.publish_result)
         publish_ok = publishsheet.if_publish_ok
         data = dict(code=errcode, msg=msg, publish_result=result, publish_ok=publish_ok)
-        return render_to_response('publish/publish_result.html', data)
+        return render(request, 'publish/publish_result.html', data)
 
 
 @login_required

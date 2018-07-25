@@ -50,7 +50,7 @@ $("#approveList").click(function () {
 });
 
 function approveSheet(sheet_id) {
-    let url = '/asset/project/approve/init/?sheet_id=' + sheet_id;
+    let url = '/asset/approve/init/?sheet_id=' + sheet_id;
     $.ajax({
         url: url,
         type: "GET",
@@ -87,7 +87,7 @@ function approveRefuseReasonDetail(sheet_id) {
 }
 
 function approve_sheet_detail(sheet_id, can_approve) {
-    let url = '/asset/project/approve/sheet/detail/?sheet_id=' + sheet_id + '&can_approve=' + can_approve;
+    let url = '/asset/approve/sheet/detail/?sheet_id=' + sheet_id + '&can_approve=' + can_approve;
     $.ajax({
         url: url,
         type: "GET",
