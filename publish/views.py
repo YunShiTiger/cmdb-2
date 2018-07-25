@@ -9,7 +9,7 @@ from django.contrib.auth.models import User
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 from publish import models
-from publish import utils
+from publish.utils import serialize_instance, cut_str
 from asset import models as asset_models
 from asset import utils as asset_utils
 
@@ -446,13 +446,13 @@ def PublishSheetList(request):
     approve_refused_list = []
     approve_passed_list = []
     for publish in publishsheets:
-        services_objs = publish.goservices.all().order_by('name')
-        services_str = ', '.join(services_objs.values_list('name', flat=True))
+        services_objs = publish.goservices.all()
+        ser_list = services_objs.order_by('name').values_list('name', flat=True)
+        services_str = ', '.join(ser_list)
         env = services_objs[0].get_env_display()
         gogroup_obj = services_objs[0].group
         level = publish.approval_level.get_name_display()
         approve_level = publish.approval_level.name
-
         if approve_level == '1':
             first_str = ''
             second_str = ''
@@ -465,14 +465,14 @@ def PublishSheetList(request):
             first_str = ', '.join(first_list)
             second_list = [owner.username for owner in publish.second_approver.all()]
             second_str = ', '.join(second_list)
+        tmp_dict = serialize_instance(publish)
 
-        tmp_dict = utils.serialize_instance(publish)
         if len(publish.sql_before) > 40:
-            tmp_dict['sql_before'] = utils.cut_str(publish.sql_before, 40)
+            tmp_dict['sql_before'] = cut_str(publish.sql_before, 40)
         if len(publish.sql_after) > 40:
-            tmp_dict['sql_after'] = utils.cut_str(publish.sql_after, 40)
+            tmp_dict['sql_after'] = cut_str(publish.sql_after, 40)
         if len(publish.consul_key) > 40:
-            tmp_dict['consul_key'] = utils.cut_str(publish.consul_key, 40)
+            tmp_dict['consul_key'] = cut_str(publish.consul_key, 40)
 
         tmp_dict.update({'id': publish.id, 'gogroup': gogroup_obj.name, 'services_str': services_str, 'env': env,
                          'approve_level': approve_level, 'level': level, 'first_str': first_str,
@@ -651,13 +651,13 @@ def PublishSheetDoneList(request):
             second_list = [owner.username for owner in publish.second_approver.all()]
             second_str = ', '.join(second_list)
 
-        tmp_dict = utils.serialize_instance(publish)
+        tmp_dict = serialize_instance(publish)
         if len(publish.sql_before) > 40:
-            tmp_dict['sql_before'] = utils.cut_str(publish.sql_before, 40)
+            tmp_dict['sql_before'] = cut_str(publish.sql_before, 40)
         if len(publish.sql_after) > 40:
-            tmp_dict['sql_after'] = utils.cut_str(publish.sql_after, 40)
+            tmp_dict['sql_after'] = cut_str(publish.sql_after, 40)
         if len(publish.consul_key) > 40:
-            tmp_dict['consul_key'] = utils.cut_str(publish.consul_key, 40)
+            tmp_dict['consul_key'] = cut_str(publish.consul_key, 40)
         tmp_dict.update(
             {'gogroup': gogroup_obj.name, 'services_str': services_str, 'env': env, 'approve_level': approve_level,
              'level': level, 'first_str': first_str, 'second_str': second_str, 'creator': publish.creator.username})
@@ -1001,13 +1001,13 @@ def ApproveList(request):
             gogroup_obj = services_objs[0].group
             level = publish.approval_level.get_name_display()
 
-            tmp_dict = utils.serialize_instance(publish)
+            tmp_dict = serialize_instance(publish)
             if len(publish.sql_before) > 40:
-                tmp_dict['sql_before'] = utils.cut_str(publish.sql_before, 40)
+                tmp_dict['sql_before'] = cut_str(publish.sql_before, 40)
             if len(publish.sql_after) > 40:
-                tmp_dict['sql_after'] = utils.cut_str(publish.sql_after, 40)
+                tmp_dict['sql_after'] = cut_str(publish.sql_after, 40)
             if len(publish.consul_key) > 40:
-                tmp_dict['consul_key'] = utils.cut_str(publish.consul_key, 40)
+                tmp_dict['consul_key'] = cut_str(publish.consul_key, 40)
 
             # 判断单子状态，决定是否显示在我的审批页面
             if approve_level == '1':
@@ -1118,7 +1118,7 @@ def ApproveInit(request):
         data = dict(code=errcode, msg=msg)
         return render_to_response('publish/publish_sheets_list.html', data)
     else:
-        tmp_dict = utils.serialize_instance(publishsheet)
+        tmp_dict = serialize_instance(publishsheet)
         service_objs = publishsheet.goservices.all()
         gogroup = service_objs[0].group
         try:
@@ -1236,14 +1236,14 @@ def PublishSheetDetail(request):
         qa_objs = sheet_obj.qa.all().order_by('username')
         qa_str = ', '.join(qa_objs.values_list('username', flat=True))
 
-        content = utils.serialize_instance(sheet_obj)
+        content = serialize_instance(sheet_obj)
 
         if len(sheet_obj.sql_before) > 40:
-            content['sql_before'] = utils.cut_str(sheet_obj.sql_before, 40)
+            content['sql_before'] = cut_str(sheet_obj.sql_before, 40)
         if len(sheet_obj.sql_after) > 40:
-            content['sql_after'] = utils.cut_str(sheet_obj.sql_after, 40)
+            content['sql_after'] = cut_str(sheet_obj.sql_after, 40)
         if len(sheet_obj.consul_key) > 40:
-            content['consul_key'] = utils.cut_str(sheet_obj.consul_key, 40)
+            content['consul_key'] = cut_str(sheet_obj.consul_key, 40)
 
         content['if_review'] = sheet_obj.get_if_review_display()
         if sheet_obj.if_review == '1':
@@ -1422,14 +1422,14 @@ def ApproveSheetDetail(request):
         qa_objs = sheet_obj.qa.all().order_by('username')
         qa_str = ', '.join(qa_objs.values_list('username', flat=True))
 
-        content = utils.serialize_instance(sheet_obj)
+        content = serialize_instance(sheet_obj)
 
         if len(sheet_obj.sql_before) > 40:
-            content['sql_before'] = utils.cut_str(sheet_obj.sql_before, 40)
+            content['sql_before'] = cut_str(sheet_obj.sql_before, 40)
         if len(sheet_obj.sql_after) > 40:
-            content['sql_after'] = utils.cut_str(sheet_obj.sql_after, 40)
+            content['sql_after'] = cut_str(sheet_obj.sql_after, 40)
         if len(sheet_obj.consul_key) > 40:
-            content['consul_key'] = utils.cut_str(sheet_obj.consul_key, 40)
+            content['consul_key'] = cut_str(sheet_obj.consul_key, 40)
 
         content['if_review'] = sheet_obj.get_if_review_display()
         if sheet_obj.if_review == '1':
