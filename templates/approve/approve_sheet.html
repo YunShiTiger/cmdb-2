@@ -1,255 +1,307 @@
-<div class="wrapper wrapper-content">
-    <div class="row">
-        <div class="col-lg-12">
-            <div class="ibox">
-                <div class="ibox-content">
-                    <form role="form" id="publish_form">
-                        <div class="row">
-                            <div class="col-lg-6">
-                                <div class="form-group">
-                                    <span style="color: red;">*</span><label>&nbsp;发布日期</label>
-                                    <input type="text" class="form-control" value="{{ approve_sheet.publish_date }}"
-                                           readonly>
-                                </div>
-                            </div>
-                            <div class="col-lg-6">
-                                <div class="form-group">
-                                    <span style="color: red;">*</span><label>&nbsp;开始发布时间</label>
-                                    <input type="text" class="form-control" value="{{ approve_sheet.publish_time }}"
-                                           readonly>
+{% extends 'base.html' %}
+{% include 'link_css.html' %}
+{% block self_head_css_js %}
+    <link href="/static/css/new_style.css" rel="stylesheet">
+    <link href="/static/alert/select2.min.css" rel="stylesheet">
+    <link href="/static/css/plugins/timepicker/bootstrap-timepicker.min.css" rel="stylesheet">
+    <link href="/static/css/plugins/datepicker/datepicker3.css" rel="stylesheet">
+{% endblock %}
+{% block self_footer_js %}
+    <script src="/static/alert/select2.min.js"></script>
+    <script src="/static/js/timepicker/bootstrap-timepicker.js"></script>
+    <script src="/static/js/datapicker/bootstrap-datepicker.js"></script>
+{% endblock %}
+{% block content %}
+    <div class="tabs-container">
+        <ul class="nav nav-tabs">
+            <li id="approveList" class="active"><a href="/asset/approve/list/">审批发布单</a></li>
+            <li id="approveDetail" class="" style="display: none"><a href="/asset/approve/init/">审批</a></li>
+        </ul>
+        <div class="tab-content">
+
+            <div id="tab-2" class="tab-pane">
+                <div class="wrapper wrapper-content">
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <div class="ibox">
+                                <div class="ibox-content">
+                                    <form role="form" id="publish_form">
+                                        <div class="row">
+                                            <div class="col-lg-6">
+                                                <div class="form-group">
+                                                    <span style="color: red;">*</span><label>&nbsp;发布日期</label>
+                                                    <input type="text" class="form-control"
+                                                           value="{{ approve_sheet.publish_date }}"
+                                                           readonly>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-6">
+                                                <div class="form-group">
+                                                    <span style="color: red;">*</span><label>&nbsp;开始发布时间</label>
+                                                    <input type="text" class="form-control"
+                                                           value="{{ approve_sheet.publish_time }}"
+                                                           readonly>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="row">
+                                            <div class="col-lg-6">
+                                                <div class="form-group">
+                                                    <span style="color: red;">*</span><label>&nbsp;发布项目</label>
+                                                    <input type="text" class="form-control"
+                                                           value="{{ approve_sheet.group_name }}"
+                                                           readonly>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-6">
+                                                <div class="form-group">
+                                                    <span style="color: red;">*</span><label>&nbsp;环境</label>
+                                                    <input type="text" class="form-control"
+                                                           value="{{ approve_sheet.env }}" readonly>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="row">
+                                            <div class="col-lg-6">
+                                                <div class="form-group">
+                                                    <span style="color: red;">*</span><label>&nbsp;测试人</label>
+                                                    <input type="text" class="form-control"
+                                                           value="{{ approve_sheet.tapd_url }}"
+                                                           readonly>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-6">
+                                                <div class="form-group">
+                                                    <span style="color: red;">*</span><label>&nbsp;重启服务 (最多选4个)</label>
+                                                    <input type="text" class="form-control"
+                                                           value="{{ approve_sheet.services }}"
+                                                           readonly>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="row">
+                                            <div class="col-lg-6">
+                                                <div class="form-group">
+                                                    <span style="color: red;">*</span><label>&nbsp;是否code review</label>
+                                                    <div>
+                                                        <label>
+                                                            <input type="radio" value="1" id="if_review1"
+                                                                   name="if_review"
+                                                                   {% if approve_sheet.if_review == '1' %}checked=""{% endif %}
+                                                                   disabled>&nbsp;是
+                                                        </label>
+                                                        &nbsp; &nbsp; &nbsp; &nbsp;
+                                                        <label>
+                                                            <input type="radio" value="2" id="if_review2"
+                                                                   name="if_review"
+                                                                   {% if approve_sheet.if_review == '2' %}checked=""{% endif %}
+                                                                   disabled>&nbsp;否
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-6">
+                                                <div class="form-group">
+                                                    <span style="color: red;">*</span><label>&nbsp;code review 人</label>
+                                                    <input type="text" class="form-control"
+                                                           value="{{ approve_sheet.services }}"
+                                                           readonly>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="row">
+                                            <div class="col-lg-6">
+                                                <div class="form-group">
+                                                    <span style="color: red;">*</span><label>&nbsp;TAPD URL</label>
+                                                    <textarea type="text" class="form-control" rows="5"
+                                                              readonly>{{ approve_sheet.tapd_url }}</textarea>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-6">
+                                                <div class="form-group">
+                                                    <span style="color: red;">*</span><label>&nbsp;CONSUL KEY (若有consul
+                                                    key添加或修改，请让运维操作后再发布)</label>
+                                                    <textarea type="text" class="form-control" id="consul_key"
+                                                              rows="5"
+                                                              readonly>{{ approve_sheet.consul_key }}</textarea>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="row">
+                                            <div class="col-lg-6">
+                                                <div class="form-group">
+                                                    <span style="color: red;">*</span><label>&nbsp;事前SQL</label>
+                                                    <textarea type="text" class="form-control" rows="5"
+                                                              readonly>{{ approve_sheet.sql_before }}</textarea>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-6">
+                                                <div class="form-group">
+                                                    <span style="color: red;">*</span><label>&nbsp;事后SQL</label>
+                                                    <textarea type="text" class="form-control" id="consul_key"
+                                                              rows="5" readonly>{{ approve_sheet.sql_after }}</textarea>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-lg-6">
+                                                <div class="form-group">
+                                                    <label>&nbsp;备注</label>
+                                                    <textarea type="text" class="form-control" rows="5"
+                                                              readonly>{{ approve_sheet.comment }}</textarea>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-6">
+                                                <div class="form-group">
+                                                    <label>&nbsp;紧急发布原因</label>
+                                                    <textarea type="text" class="form-control" id="consul_key"
+                                                              rows="5" readonly>{{ approve_sheet.reason }}</textarea>
+                                                </div>
+                                            </div>
+                                        </div>
+
+
+                                        <div class="row">
+                                            <div class="col-lg-6">
+                                                <div class="form-group">
+                                                    <span style="color: red;">*</span><label>&nbsp;是否影响用户浏览（首页，搜索，详情页等）</label>
+                                                    <div>
+                                                        <label>
+                                                            <input type="radio" value="2" id="if_browse1"
+                                                                   name="if_browse"
+                                                                   {% if approve_sheet.if_browse == '1' %}checked=""{% endif %}
+                                                                   disabled>&nbsp;是
+                                                        </label>
+                                                        &nbsp;&nbsp;&nbsp;&nbsp;
+                                                        <label>
+                                                            <input type="radio" value="1" id="if_browse2"
+                                                                   name="if_browse"
+                                                                   {% if approve_sheet.if_browse == '2' %}checked=""{% endif %}
+                                                                   disabled>&nbsp;否
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-6">
+                                                <div class="form-group">
+                                                    <span style="color: red;">*</span><label>&nbsp;是否影响订单流程（注册登录，购物车，订单，支付等）</label>
+                                                    <div>
+                                                        <label>
+                                                            <input type="radio" value="2" id="if_order1"
+                                                                   name="if_order"
+                                                                   {% if approve_sheet.if_order == '1' %}checked=""{% endif %}
+                                                                   disabled>&nbsp;是
+                                                        </label>
+                                                        &nbsp;&nbsp;&nbsp;&nbsp;
+                                                        <label>
+                                                            <input type="radio" value="1" id="if_order2"
+                                                                   name="if_order"
+                                                                   {% if approve_sheet.if_order == '2' %}checked=""{% endif %}
+                                                                   disabled>&nbsp;否
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="row">
+                                            <div class="col-lg-6">
+                                                <div class="form-group">
+                                                    <span style="color: red;">*</span><label>&nbsp;是否影响履单流程（采购分配，提交发货，卖家订单处理等）</label>
+                                                    <div>
+                                                        <label>
+                                                            <input type="radio" value="2" id="if_buy1"
+                                                                   name="if_buy"
+                                                                   {% if approve_sheet.if_buy == '1' %}checked=""{% endif %}
+                                                                   disabled>&nbsp;是
+                                                        </label>
+                                                        &nbsp;&nbsp;&nbsp;&nbsp;
+                                                        <label>
+                                                            <input type="radio" value="1" id="if_buy2"
+                                                                   name="if_buy"
+                                                                   {% if approve_sheet.if_buy == '2' %}checked=""{% endif %}
+                                                                   disabled>&nbsp;否
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                        </div>
+
+                                        <br>
+                                        <div class="text-center">
+                                            <a class="btn btn-sm btn-primary m-t-n-xs"
+                                               id="approve_agree" data-toggle="modal" data-target="#agreeModal">同意
+                                            </a>&nbsp;&nbsp;&nbsp;&nbsp;
+                                            <a class="btn btn-sm btn-danger m-t-n-xs"
+                                               id="approve_refuse" data-toggle="modal" data-target="#refuseModal">拒绝
+                                            </a>
+                                        </div>
+                                    </form>
+
                                 </div>
                             </div>
                         </div>
+                    </div>
+                </div>
 
-                        <div class="row">
-                            <div class="col-lg-6">
-                                <div class="form-group">
-                                    <span style="color: red;">*</span><label>&nbsp;发布项目</label>
-                                    <input type="text" class="form-control" value="{{ approve_sheet.group_name }}"
-                                           readonly>
-                                </div>
+                <div class="modal inmodal fade" id="agreeModal" tabindex="-1" role="dialog"
+                     aria-labelledby="addModalLabel"
+                     aria-hidden="true">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal"><span
+                                        aria-hidden="true">×</span><span class="sr-only">Close</span></button>
+                                <i class="fa fa-check modal-icon" style="color: #1AB394"></i>
+                                <h4 class="modal-title" id="minion_old">同意发布</h4>
                             </div>
-                            <div class="col-lg-6">
-                                <div class="form-group">
-                                    <span style="color: red;">*</span><label>&nbsp;环境</label>
-                                    <input type="text" class="form-control" value="{{ approve_sheet.env }}" readonly>
-                                </div>
+                            {#            <div class="modal-body" id="refuse_reason_modal">#}
+                            {#                <label>&nbsp;提醒发布人的注意事项（选填）</label>#}
+                            {#                <textarea type="text" class="form-control" id="agree_text" rows="5"></textarea>#}
+                            {#            </div>#}
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-white" data-dismiss="modal">关闭</button>
+                                <button type="button" class="btn btn-primary"
+                                        onclick="agreeButton('{{ approve_sheet.id }}')">同意
+                                </button>
                             </div>
                         </div>
+                    </div>
+                </div>
 
-                        <div class="row">
-                            <div class="col-lg-6">
-                                <div class="form-group">
-                                    <span style="color: red;">*</span><label>&nbsp;测试人</label>
-                                    <input type="text" class="form-control" value="{{ approve_sheet.tapd_url }}"
-                                           readonly>
-                                </div>
+                <div class="modal inmodal fade" id="refuseModal" tabindex="-1" role="dialog"
+                     aria-labelledby="addModalLabel"
+                     aria-hidden="true">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal"><span
+                                        aria-hidden="true">×</span><span class="sr-only">Close</span></button>
+                                <i class="fa fa-times modal-icon" style="color: red"></i>
+                                <h4 class="modal-title" id="minion_old">拒绝发布</h4>
                             </div>
-                            <div class="col-lg-6">
-                                <div class="form-group">
-                                    <span style="color: red;">*</span><label>&nbsp;重启服务 (最多选4个)</label>
-                                    <input type="text" class="form-control" value="{{ approve_sheet.services }}"
-                                           readonly>
-                                </div>
+                            <div class="modal-body" id="refuse_reason_modal">
+                                <span style="color: red;">*</span><label>&nbsp;拒绝理由</label>
+                                <textarea type="text" class="form-control" id="refuse_text" rows="5"></textarea>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-white" data-dismiss="modal">关闭</button>
+                                <button type="button" class="btn btn-danger"
+                                        onclick="refuseButton('{{ approve_sheet.id }}')">拒绝
+                                </button>
                             </div>
                         </div>
-
-                        <div class="row">
-                            <div class="col-lg-6">
-                                <div class="form-group">
-                                    <span style="color: red;">*</span><label>&nbsp;是否code review</label>
-                                    <div>
-                                        <label>
-                                            <input type="radio" value="1" id="if_review1"
-                                                   name="if_review" {% if approve_sheet.if_review == '1' %}checked=""{% endif %} disabled>&nbsp;是
-                                        </label>
-                                        &nbsp; &nbsp; &nbsp; &nbsp;
-                                        <label>
-                                            <input type="radio" value="2" id="if_review2"
-                                                   name="if_review" {% if approve_sheet.if_review == '2' %}checked=""{% endif %} disabled>&nbsp;否
-                                        </label>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-lg-6">
-                                <div class="form-group">
-                                    <span style="color: red;">*</span><label>&nbsp;code review 人</label>
-                                    <input type="text" class="form-control" value="{{ approve_sheet.services }}"
-                                           readonly>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-lg-6">
-                                <div class="form-group">
-                                    <span style="color: red;">*</span><label>&nbsp;TAPD URL</label>
-                                    <textarea type="text" class="form-control" rows="5"
-                                              readonly>{{ approve_sheet.tapd_url }}</textarea>
-                                </div>
-                            </div>
-                            <div class="col-lg-6">
-                                <div class="form-group">
-                                    <span style="color: red;">*</span><label>&nbsp;CONSUL KEY (若有consul
-                                    key添加或修改，请让运维操作后再发布)</label>
-                                    <textarea type="text" class="form-control" id="consul_key"
-                                              rows="5" readonly>{{ approve_sheet.consul_key }}</textarea>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-lg-6">
-                                <div class="form-group">
-                                    <span style="color: red;">*</span><label>&nbsp;事前SQL</label>
-                                    <textarea type="text" class="form-control" rows="5"
-                                              readonly>{{ approve_sheet.sql_before }}</textarea>
-                                </div>
-                            </div>
-                            <div class="col-lg-6">
-                                <div class="form-group">
-                                    <span style="color: red;">*</span><label>&nbsp;事后SQL</label>
-                                    <textarea type="text" class="form-control" id="consul_key"
-                                              rows="5" readonly>{{ approve_sheet.sql_after }}</textarea>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-lg-6">
-                                <div class="form-group">
-                                    <label>&nbsp;备注</label>
-                                    <textarea type="text" class="form-control" rows="5"
-                                              readonly>{{ approve_sheet.comment }}</textarea>
-                                </div>
-                            </div>
-                            <div class="col-lg-6">
-                                <div class="form-group">
-                                    <label>&nbsp;紧急发布原因</label>
-                                    <textarea type="text" class="form-control" id="consul_key"
-                                              rows="5" readonly>{{ approve_sheet.reason }}</textarea>
-                                </div>
-                            </div>
-                        </div>
-
-
-                        <div class="row">
-                            <div class="col-lg-6">
-                                <div class="form-group">
-                                    <span style="color: red;">*</span><label>&nbsp;是否影响用户浏览（首页，搜索，详情页等）</label>
-                                    <div>
-                                        <label>
-                                            <input type="radio" value="2" id="if_browse1"
-                                                   name="if_browse" {% if approve_sheet.if_browse == '1' %}checked=""{% endif %} disabled>&nbsp;是
-                                        </label>
-                                        &nbsp;&nbsp;&nbsp;&nbsp;
-                                        <label>
-                                            <input type="radio" value="1" id="if_browse2"
-                                                   name="if_browse"{% if approve_sheet.if_browse == '2' %}checked=""{% endif %} disabled>&nbsp;否
-                                        </label>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-lg-6">
-                                <div class="form-group">
-                                    <span style="color: red;">*</span><label>&nbsp;是否影响订单流程（注册登录，购物车，订单，支付等）</label>
-                                    <div>
-                                        <label>
-                                            <input type="radio" value="2" id="if_order1"
-                                                   name="if_order" {% if approve_sheet.if_order == '1' %}checked=""{% endif %} disabled>&nbsp;是
-                                        </label>
-                                        &nbsp;&nbsp;&nbsp;&nbsp;
-                                        <label>
-                                            <input type="radio" value="1" id="if_order2"
-                                                   name="if_order" {% if approve_sheet.if_order == '2' %}checked=""{% endif %} disabled>&nbsp;否
-                                        </label>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-lg-6">
-                                <div class="form-group">
-                                    <span style="color: red;">*</span><label>&nbsp;是否影响履单流程（采购分配，提交发货，卖家订单处理等）</label>
-                                    <div>
-                                        <label>
-                                            <input type="radio" value="2" id="if_buy1"
-                                                   name="if_buy" {% if approve_sheet.if_buy == '1' %}checked=""{% endif %} disabled>&nbsp;是
-                                        </label>
-                                        &nbsp;&nbsp;&nbsp;&nbsp;
-                                        <label>
-                                            <input type="radio" value="1" id="if_buy2"
-                                                   name="if_buy" {% if approve_sheet.if_buy == '2' %}checked=""{% endif %} disabled>&nbsp;否
-                                        </label>
-                                    </div>
-                                </div>
-                            </div>
-
-                        </div>
-
-                        <br>
-                        <div class="text-center">
-                            <a class="btn btn-sm btn-primary m-t-n-xs"
-                               id="approve_agree" data-toggle="modal" data-target="#agreeModal">同意
-                            </a>&nbsp;&nbsp;&nbsp;&nbsp;
-                            <a class="btn btn-sm btn-danger m-t-n-xs"
-                               id="approve_refuse" data-toggle="modal" data-target="#refuseModal">拒绝
-                            </a>
-                        </div>
-                    </form>
-
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
+    <script src="/static/js/custom/approve_sheet.js"></script>
 
-<div class="modal inmodal fade" id="agreeModal" tabindex="-1" role="dialog"
-     aria-labelledby="addModalLabel"
-     aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal"><span
-                        aria-hidden="true">×</span><span class="sr-only">Close</span></button>
-                <i class="fa fa-check modal-icon" style="color: #1AB394"></i>
-                <h4 class="modal-title" id="minion_old">同意发布</h4>
-            </div>
-            {#            <div class="modal-body" id="refuse_reason_modal">#}
-            {#                <label>&nbsp;提醒发布人的注意事项（选填）</label>#}
-            {#                <textarea type="text" class="form-control" id="agree_text" rows="5"></textarea>#}
-            {#            </div>#}
-            <div class="modal-footer">
-                <button type="button" class="btn btn-white" data-dismiss="modal">关闭</button>
-                <button type="button" class="btn btn-primary" onclick="agreeButton('{{ approve_sheet.id }}')">同意
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="modal inmodal fade" id="refuseModal" tabindex="-1" role="dialog"
-     aria-labelledby="addModalLabel"
-     aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal"><span
-                        aria-hidden="true">×</span><span class="sr-only">Close</span></button>
-                <i class="fa fa-times modal-icon" style="color: red"></i>
-                <h4 class="modal-title" id="minion_old">拒绝发布</h4>
-            </div>
-            <div class="modal-body" id="refuse_reason_modal">
-                <span style="color: red;">*</span><label>&nbsp;拒绝理由</label>
-                <textarea type="text" class="form-control" id="refuse_text" rows="5"></textarea>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-white" data-dismiss="modal">关闭</button>
-                <button type="button" class="btn btn-danger" onclick="refuseButton('{{ approve_sheet.id }}')">拒绝
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<script src="/static/js/custom/approve_sheet.js"></script>
+{% endblock %}

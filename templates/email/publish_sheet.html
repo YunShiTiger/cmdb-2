@@ -1,0 +1,82 @@
+<html>
+<head>
+    <meta name="viewport" content="width=device-width"/>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <title>{{ title }}</title>
+    <link href="/static/css/style.css" rel="stylesheet">
+</head>
+
+<body>
+
+<table class="body-wrap">
+    <tr>
+        <td></td>
+        <td class="container" width="600">
+            <div class="content">
+                <table class="main" width="100%" cellpadding="0" cellspacing="0">
+                    <tr>
+                        <td class="content-wrap aligncenter">
+                            <table width="100%" cellpadding="0" cellspacing="0">
+                                <tr>
+                                    <td class="content-block">
+                                        <h2 class="aligncenter"><a {% if can_approve == '1' %}href="http://127.0.0.1:8010/asset/approve/init/?sheet_id={{ sheet.id }}"{% else %}href="http://127.0.0.1:8010/asset/project/publishsheet/list/"{% endif %}> {{ head_content }}</a>
+                                        </h2>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><br></td>
+                                </tr>
+                                <tr>
+                                    <td class="content-block aligncenter">
+                                        <table class="invoice">
+                                            <tr>
+                                                <td>发布人</td>
+                                                <td class="alignright">{{ sheet.creator }}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>发布时间</td>
+                                                <td class="alignright">{{ sheet.publish_date }} {{ sheet.publish_time }}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>项目</td>
+                                                <td class="alignright">{{ sheet.gogroup }}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>环境</td>
+                                                <td class="alignright">{{ sheet.env }}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>重启服务</td>
+                                                <td class="alignright">{{ sheet.services_str }}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>紧急原因</td>
+                                                <td class="alignright">{{ sheet.reason }}</td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+
+                            </table>
+                        </td>
+                    </tr>
+                </table>
+                <div class="footer">
+                    <table width="100%">
+                        <tr>
+                            <td class="content-block aligncenter">
+                                <br>
+                                Copyright ezbuy Team of CMDB @2018. Version 1.0
+                                <br>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </td>
+        <td></td>
+    </tr>
+</table>
+
+</body>
+</html>

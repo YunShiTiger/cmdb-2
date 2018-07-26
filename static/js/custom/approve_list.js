@@ -1,6 +1,10 @@
 $(document).ready(function () {
+    document.getElementById('approveDetail').style.display = 'none';
+    $("#approveDetail").removeClass("active");
+    $("#tab-2").removeClass("active");
+    $("#approveList").addClass("active");
+    $("#tab-1").addClass("active");
     init_approval_level();
-
 });
 
 function init_approval_level() {
@@ -23,13 +27,6 @@ function init_approval_level() {
         defaultTime: '0:00',
     });
 
-
-    // $('.level-select').select2({
-    //     minimumResultsForSearch: Infinity,
-    //     language: 'zh-CN',
-    //     width: '100%',
-    //     placeholder: '请选择',
-    // });
 }
 
 $('#createApprove').click(function () {

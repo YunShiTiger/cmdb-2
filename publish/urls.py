@@ -17,7 +17,8 @@ urlpatterns = patterns('',
                        url(r'^project/template/create/$', templateCreate, name='templateCreate'),
                        url(r'^project/template/delete/$', templateDelete, name='templateDelete'),
 
-                       url(r'^project/publishsheet/create/init/$', createPublishSheetInit, name='createPublishSheetInit'),
+                       url(r'^project/publishsheet/create/init/$', createPublishSheetInit,
+                           name='createPublishSheetInit'),
                        url(r'^project/publishsheet/create/$', createPublishSheet, name='createPublishSheet'),
                        url(r'^project/publishsheet/delete/$', PublishSheetDelete, name='PublishSheetList'),
                        url(r'^project/publishsheet/list/$', PublishSheetList, name='PublishSheetList'),
@@ -32,4 +33,6 @@ urlpatterns = patterns('',
                        url(r'^approve/init/$', ApproveInit, name='ApproveInit'),  # 单个审批单
                        url(r'^approve/judge/$', ApproveJudge, name='ApproveJudge'),
                        url(r'^approve/sheet/detail/$', ApproveSheetDetail, name='ApproveSheetDetail'),
+
+                       url(r'^project/send/email/$', sendEmail, name='sendEmail'),  # 发邮件
                        )

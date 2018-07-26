@@ -2,11 +2,14 @@
 import json
 from datetime import datetime
 import time
+import requests
 
 from django.shortcuts import render, HttpResponse, render_to_response
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.core.mail import EmailMultiAlternatives, get_connection, EmailMessage
+from django.template import Context, loader
 
 from publish import models
 from publish.utils import serialize_instance, cut_str
@@ -938,6 +941,35 @@ def createPublishSheet(request):
             for reviewer_obj in reviewer_objs:
                 publishsheet_obj.reviewer.add(reviewer_obj)
 
+        if publishsheet_obj.approval_level.name != '1':
+            if projectinfo_obj:
+                # 发邮件给一级审批人
+                to_list = [approver.email for approver in publishsheet_obj.first_approver.all() if approver.email]
+                url = 'http://127.0.0.1:8010/asset/project/send/email/'
+                params = {
+                    'sheet_id': publishsheet_obj.id,
+                    'head_content': u'请审批发布单',
+                    'to': to_list,
+                    'can_approve': '1'
+                }
+                r = requests.get(url, params)
+                if r.status_code != 200:
+                    errcode = 500
+                    msg = u'给一级审批人的邮件发送失败'
+                # 发邮件给项目的邮件组
+                if projectinfo_obj.mail_group.all():
+                    to_list = [approver.email for approver in projectinfo_obj.mail_group.all() if approver.email]
+                    url = 'http://127.0.0.1:8010/asset/project/send/email/'
+                    params = {
+                        'sheet_id': publishsheet_obj.id,
+                        'head_content': u'新增发布单',
+                        'to': to_list,
+                        'can_approve': '2'
+                    }
+                    r = requests.get(url, params)
+                    if r.status_code != 200:
+                        errcode = 500
+                        msg = u'给通知邮件组的邮件发送失败'
         data = dict(code=errcode, msg=msg)
         return HttpResponse(json.dumps(data), content_type='application/json')
 
@@ -1116,7 +1148,7 @@ def ApproveInit(request):
         errcode = 500
         msg = u'发布单不存在'
         data = dict(code=errcode, msg=msg)
-        return render_to_response('publish/publish_sheets_list.html', data)
+        return render(request, 'publish/publish_sheets_list.html', data)
     else:
         tmp_dict = serialize_instance(publishsheet)
         service_objs = publishsheet.goservices.all()
@@ -1148,7 +1180,7 @@ def ApproveInit(request):
             })
 
         data = dict(code=errcode, msg=msg, approve_sheet=tmp_dict)
-        return render_to_response('approve/approve_sheet.html', data)
+        return render(request, 'approve/approve_sheet.html', data)
 
 
 @login_required
@@ -1478,3 +1510,63 @@ def ApproveSheetDetail(request):
     content['can_approve'] = can_approve
     data = dict(code=errcode, msg=msg, content=content)
     return render_to_response('approve/approve_sheet_detail.html', data)
+
+
+def sendEmail(request):
+    sheet_id = int(request.GET['sheet_id'])
+    head_content = request.GET['head_content']
+    can_approve = request.GET.get('can_approve', '2')
+    to_list = request.GET.getlist('to', [])
+
+    errcode = 0
+    msg = 'ok'
+
+    if to_list:
+        try:
+            sheet_obj = models.PublishSheet.objects.get(id=sheet_id)
+        except models.PublishSheet.DoesNotExist:
+            errcode = 500
+            msg = u'所选发布单不存在'
+            data = dict(code=errcode, msg=msg)
+            return HttpResponse(json.dumps(data), content_type='application/json')
+        else:
+            sheet_dict = serialize_instance(sheet_obj)
+            services_objs = sheet_obj.goservices.all()
+            ser_list = services_objs.order_by('name').values_list('name', flat=True)
+            services_str = ', '.join(ser_list)
+            gogroup_obj = services_objs[0].group
+            env = services_objs[0].get_env_display()
+            sheet_dict.update({'services_str': services_str, 'gogroup': gogroup_obj.name, 'creator': sheet_obj.creator.username, 'env': env})
+
+            print sheet_obj.reason
+
+            EMAIL_HOST_USER = 'junkili@163.com'
+            subject = u'cmdb发布系统'
+            from_email = EMAIL_HOST_USER
+
+            content = {
+                'title': subject,
+                'sheet': sheet_dict,
+                'head_content': head_content,
+                'can_approve': can_approve,
+            }
+            email_template_name = 'email/publish_sheet.html'
+            email_content = loader.render_to_string(email_template_name, content)
+
+            conn = get_connection()
+            conn.username = 'junkili'  # 更改用户名
+            conn.password = 'EzbuyBest1'  # 更改密码
+            conn.host = 'smtp.163.com'  # 设置邮件服务器
+            conn.open()
+
+            email = EmailMultiAlternatives(subject, email_content, from_email, to_list)
+            email.attach_alternative(email_content, "text/html")
+            conn.send_messages([email, ])
+            conn.close()
+            data = dict(code=errcode, msg=msg, content=content)
+            return HttpResponse(json.dumps(data), content_type='application/json')
+    else:
+        errcode = 500
+        msg = u'没有收件人'
+        data = dict(code=errcode, msg=msg)
+        return HttpResponse(json.dumps(data), content_type='application/json')
