@@ -62,6 +62,11 @@ function refuseButton(publish_id) {
         data: data,
         contentType: 'application/x-www-form-urlencoded',
         traditional: true,
+        beforeSend: function () {
+            // 禁用按钮防止重复提交
+            $("#refuseButtonId").attr({disabled: "disabled"});
+            $("#page_loading").show();
+        },
         success: function (result) {
             if (result.code === 0) {
                 window.location.href="/asset/approve/list/";
@@ -69,9 +74,12 @@ function refuseButton(publish_id) {
             else {
                 alert(result.msg);
             }
+            $("#refuseButtonId").removeAttr("disabled");
+            $("#page_loading").hide();
         },
         error: function () {
             alert('失败');
+            $("#page_loading").hide();
         }
     });
 }

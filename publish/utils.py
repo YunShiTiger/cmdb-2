@@ -1,12 +1,19 @@
 # coding:utf8
-import json
+import json, os, sys
 import re
 import threading
+reload(sys)
+sys.setdefaultencoding('utf8')
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "mico.settings")
+import django
+django.setup()
 
 from functools import partial
 from django.core.serializers import serialize
 from django.core.mail import EmailMultiAlternatives, get_connection
-from mico.settings import EMAIL_HOST, EMAIL_PORT, EMAIL_HOST_USER, EMAIL_HOST_PASSWORD, EMAIL_USERNAME
+from mico.settings import EMAIL_HOST, EMAIL_PORT, EMAIL_HOST_USER, EMAIL_HOST_PASSWORD,  EMAIL_USER
+
+
 
 serialize = partial(serialize, 'json')
 
@@ -47,13 +54,14 @@ class EmailThread(threading.Thread):
 
     def run(self):
         conn = get_connection()
-        conn.username = EMAIL_USERNAME  # 更改用户名
+        conn.username = EMAIL_USER  # 更改用户名
         conn.password = EMAIL_HOST_PASSWORD  # 更改密码
         conn.host = EMAIL_HOST  # 设置邮件服务器
         conn.open()
 
         msg = EmailMultiAlternatives(self.subject, self.body, self.from_email, self.recipient_list)
         msg.attach_alternative(self.body, "text/html")
+        print '*********run done'
         # msg.send(self.fail_silently)
         conn.send_messages([msg, ])
         conn.close()

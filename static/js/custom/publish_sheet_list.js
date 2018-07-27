@@ -93,7 +93,9 @@ function start_publish(sheet_id) {
         type: "GET",
         success: function (result) {
             init_tab7();
-            $("#publish_result").html(result);
+            let url = '/asset/project/publishsheet/publish/result/?sheet_id=' + sheet_id;
+            console.log(url);
+            window.location.href=url;
         },
         error: function () {
             alert('失败');

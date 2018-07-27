@@ -242,7 +242,7 @@ $("#create_level").click(function () {
             }
             else {
                 alert(result.msg);
-                window.location.reload();
+                // window.location.reload();
                 $("#create_projectinfo").removeAttr("disabled");
             }
             $("#page_loading").hide();

@@ -8,14 +8,14 @@ from django.shortcuts import render, HttpResponse, render_to_response
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from django.core.mail import EmailMultiAlternatives, get_connection, EmailMessage
+from django.core.mail import EmailMultiAlternatives, get_connection, EmailMessage, send_mail
 from django.template import Context, loader
 
 from publish import models
 from publish.utils import serialize_instance, cut_str, send_mail_thread
 from asset import models as asset_models
 from asset import utils as asset_utils
-from mico.settings import EMAIL_HOST, EMAIL_PORT, EMAIL_HOST_USER, EMAIL_HOST_PASSWORD, EMAIL_USERNAME, CMDB_URL
+from mico.settings import EMAIL_HOST, EMAIL_PORT, EMAIL_HOST_USER, EMAIL_HOST_PASSWORD, EMAIL_USER, CMDB_URL
 
 
 @login_required
@@ -1524,7 +1524,10 @@ def PublishResult(request):
         data = dict(code=errcode, msg=msg)
         return render(request, 'publish/publish_result.html', data)
     else:
-        result = eval(publishsheet.publish_result)
+        if publishsheet.publish_result:
+            result = eval(publishsheet.publish_result)
+        else:
+            result = [{'warning': u'请耐心等待，稍后请刷新'}]
         publish_ok = publishsheet.if_publish_ok
         data = dict(code=errcode, msg=msg, publish_result=result, publish_ok=publish_ok)
         return render(request, 'publish/publish_result.html', data)
@@ -1649,8 +1652,10 @@ def sendEmail(request):
             from_email = EMAIL_HOST_USER
             email_template_name = 'email/publish_sheet.html'
             email_content = loader.render_to_string(email_template_name, content)
-
-            send_mail_thread(subject, email_content, from_email, to_list)
+            try:
+                send_mail(subject, "", from_email, to_list, html_message=email_content)
+            except Exception as e:
+                print 'send_mail failed : ', e.message
 
             data = dict(code=errcode, msg=msg, content=content)
             return HttpResponse(json.dumps(data), content_type='application/json')
