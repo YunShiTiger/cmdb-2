@@ -15,7 +15,7 @@ from publish import models
 from publish.utils import serialize_instance, cut_str, send_mail_thread
 from asset import models as asset_models
 from asset import utils as asset_utils
-from mico.settings import EMAIL_HOST, EMAIL_PORT, EMAIL_HOST_USER, EMAIL_HOST_PASSWORD, EMAIL_USERNAME
+from mico.settings import EMAIL_HOST, EMAIL_PORT, EMAIL_HOST_USER, EMAIL_HOST_PASSWORD, EMAIL_USERNAME, CMDB_URL
 
 
 @login_required
@@ -946,7 +946,7 @@ def createPublishSheet(request):
             if projectinfo_obj:
                 # 发邮件给一级审批人
                 to_list = [approver.email for approver in publishsheet_obj.first_approver.all() if approver.email]
-                url = 'http://127.0.0.1:8010/asset/project/send/email/'
+                url = CMDB_URL + 'asset/project/send/email/'
                 params = {
                     'sheet_id': publishsheet_obj.id,
                     'head_content': u'请审批发布单',
@@ -957,10 +957,11 @@ def createPublishSheet(request):
                 if r.status_code != 200:
                     errcode = 500
                     msg = u'给一级审批人的邮件发送失败'
+
                 # 发邮件给项目的邮件组
                 if projectinfo_obj.mail_group.all():
                     to_list = [approver.email for approver in projectinfo_obj.mail_group.all() if approver.email]
-                    url = 'http://127.0.0.1:8010/asset/project/send/email/'
+                    url = CMDB_URL + 'asset/project/send/email/'
                     params = {
                         'sheet_id': publishsheet_obj.id,
                         'head_content': u'新增发布单',
@@ -1089,7 +1090,19 @@ def ApproveList(request):
                         # 超时未审批
                         pass
                     else:
-                        approve_passed_list.append(tmp_dict)
+                        if publish.status == '3':
+                            try:
+                                history_obj = models.PublishApprovalHistory.objects.get(publish_sheet=publish)
+                            except models.PublishApprovalHistory.DoesNotExist:
+                                print '1----history not exist'
+                                tobe_approved_list.append(tmp_dict)
+                            else:
+                                if history_obj.approve_count == '1' and user.username in second_list:
+                                    tobe_approved_list.append(tmp_dict)
+                                else:
+                                    approve_passed_list.append(tmp_dict)
+                        else:
+                            approve_passed_list.append(tmp_dict)
 
                 elif user.username in second_list:
                     try:
@@ -1193,6 +1206,7 @@ def ApproveJudge(request):
     text = request.POST['text']
     errcode = 0
     msg = 'ok'
+
     try:
         publishsheet = models.PublishSheet.objects.get(id=publish_id)
     except models.PublishSheet.DoesNotExist:
@@ -1202,9 +1216,14 @@ def ApproveJudge(request):
         return HttpResponse(json.dumps(data), content_type='application/json')
     else:
         try:
+            projectinfo_obj = models.ProjectInfo.objects.get(group=publishsheet.goservices.all()[0].group)
+        except models.ProjectInfo.DoesNotExist:
+            projectinfo_obj = None
+
+        try:
             publish_history = models.PublishApprovalHistory.objects.get(publish_sheet=publishsheet)
         except models.PublishApprovalHistory.DoesNotExist:
-            # 从未审批过
+            # 从未审批过，现在是第一次审批
             publish_history = models.PublishApprovalHistory()
             publish_history.publish_sheet = publishsheet
             publish_history.approve_count = '1'
@@ -1212,17 +1231,52 @@ def ApproveJudge(request):
             publish_history.first_approver = user
             publish_history.first_approve_time = datetime.now()
             if approve == '1':
+                # 第一审批通过
                 # publish_history.first_notices = text
                 publishsheet.status = '3'
                 publishsheet.save()
+                publish_history.save()
+                # 收邮件方
+                if publishsheet.approval_level == '2':
+                    # 一级审批的单子
+                    can_approve = '2'
+                    to_list = [publishsheet.creator.email]
+                    if projectinfo_obj:
+                        to_list.extend(
+                            [approver.email for approver in projectinfo_obj.mail_group.all() if approver.email])
+                else:
+                    # 二级审批的单子
+                    can_approve = '1'
+                    to_list = [approver.email for approver in publishsheet.second_approver.all() if approver.email]
             else:
+                # 第一审批拒绝
                 publish_history.refuse_reason = text
+                publish_history.save()
                 publishsheet.status = '2'
                 publishsheet.save()
-            publish_history.save()
+                # 收邮件方
+                can_approve = '2'
+                to_list = [publishsheet.creator.email]
+                if projectinfo_obj:
+                    to_list.extend([approver.email for approver in projectinfo_obj.mail_group.all() if approver.email])
+
+            # 发邮件
+            url = CMDB_URL + 'asset/project/send/email/'
+            params = {
+                'sheet_id': publishsheet.id,
+                'head_content': u'发布单第一级审批结果：{0}'.format(publish_history.get_approve_status_display()),
+                'to': to_list,
+                'can_approve': can_approve
+            }
+            r = requests.get(url, params)
+            print 'ApproveJudge---if-----email done'
+            if r.status_code != 200:
+                errcode = 500
+                msg = u'邮件发送失败'
+
             asset_utils.logs(user.username, ip, 'first approve publish sheet', 'success')
         else:
-            # 被第一审批通过
+            # 被第一审批通过，现在已是第二次审批
             publish_history.approve_count = '2'
             publish_history.approve_status = approve
             publish_history.second_approver = user
@@ -1236,6 +1290,27 @@ def ApproveJudge(request):
                 publishsheet.status = '2'
                 publishsheet.save()
             publish_history.save()
+
+            # 收邮件方
+            can_approve = '2'
+            to_list = [publishsheet.creator.email]
+            if projectinfo_obj:
+                to_list.extend([approver.email for approver in projectinfo_obj.mail_group.all() if approver.email])
+
+            # 发邮件
+            url = CMDB_URL + 'asset/project/send/email/'
+            params = {
+                'sheet_id': publishsheet.id,
+                'head_content': u'发布单第二级审批结果：{0}'.format(publish_history.get_approve_status_display()),
+                'to': to_list,
+                'can_approve': can_approve
+            }
+            r = requests.get(url, params)
+            print 'ApproveJudge---else-----email done'
+            if r.status_code != 200:
+                errcode = 500
+                msg = u'邮件发送失败'
+
             asset_utils.logs(user.username, ip, 'second approve publish sheet', 'success')
 
     data = dict(code=errcode, msg=msg)

@@ -260,3 +260,5 @@ EMAIL_PORT = '25'
 EMAIL_HOST_USER = 'junkili@163.com'
 EMAIL_HOST_PASSWORD = 'EzbuyBest1'
 EMAIL_USERNAME = 'junkili'
+
+CMDB_URL = 'http://127.0.0.1:8010/'
