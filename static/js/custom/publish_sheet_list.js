@@ -91,10 +91,12 @@ function start_publish(sheet_id) {
     $.ajax({
         url: url,
         type: "GET",
-        success: function (result) {
+        beforeSend: function(){
             init_tab7();
-            let url = '/asset/project/publishsheet/publish/result/?sheet_id=' + sheet_id;
             console.log(url);
+            window.location.href=url;
+        },
+        success: function (result) {
             window.location.href=url;
         },
         error: function () {

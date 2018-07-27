@@ -1525,7 +1525,8 @@ def PublishResult(request):
         return render(request, 'publish/publish_result.html', data)
     else:
         if publishsheet.publish_result:
-            result = eval(publishsheet.publish_result)
+            old_result = eval(publishsheet.publish_result)
+            result = [res for res in old_result if res]
         else:
             result = [{'warning': u'请耐心等待，稍后请刷新'}]
         publish_ok = publishsheet.if_publish_ok
