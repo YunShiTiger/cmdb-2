@@ -12,9 +12,10 @@ from django.core.mail import EmailMultiAlternatives, get_connection, EmailMessag
 from django.template import Context, loader
 
 from publish import models
-from publish.utils import serialize_instance, cut_str
+from publish.utils import serialize_instance, cut_str, send_mail_thread
 from asset import models as asset_models
 from asset import utils as asset_utils
+from mico.settings import EMAIL_HOST, EMAIL_PORT, EMAIL_HOST_USER, EMAIL_HOST_PASSWORD, EMAIL_USERNAME
 
 
 @login_required
@@ -1538,31 +1539,20 @@ def sendEmail(request):
             env = services_objs[0].get_env_display()
             sheet_dict.update({'services_str': services_str, 'gogroup': gogroup_obj.name, 'creator': sheet_obj.creator.username, 'env': env})
 
-            print sheet_obj.reason
-
-            EMAIL_HOST_USER = 'junkili@163.com'
             subject = u'cmdb发布系统'
-            from_email = EMAIL_HOST_USER
-
             content = {
                 'title': subject,
                 'sheet': sheet_dict,
                 'head_content': head_content,
                 'can_approve': can_approve,
             }
+
+            from_email = EMAIL_HOST_USER
             email_template_name = 'email/publish_sheet.html'
             email_content = loader.render_to_string(email_template_name, content)
 
-            conn = get_connection()
-            conn.username = 'junkili'  # 更改用户名
-            conn.password = 'EzbuyBest1'  # 更改密码
-            conn.host = 'smtp.163.com'  # 设置邮件服务器
-            conn.open()
+            send_mail_thread(subject, email_content, from_email, to_list)
 
-            email = EmailMultiAlternatives(subject, email_content, from_email, to_list)
-            email.attach_alternative(email_content, "text/html")
-            conn.send_messages([email, ])
-            conn.close()
             data = dict(code=errcode, msg=msg, content=content)
             return HttpResponse(json.dumps(data), content_type='application/json')
     else:

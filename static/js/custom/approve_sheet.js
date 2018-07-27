@@ -32,7 +32,7 @@ function agreeButton(publish_id) {
         traditional: true,
         success: function (result) {
             if (result.code === 0) {
-                window.location.reload();
+                window.location.href="/asset/approve/list/";
             }
             else {
                 alert(result.msg);
@@ -64,7 +64,7 @@ function refuseButton(publish_id) {
         traditional: true,
         success: function (result) {
             if (result.code === 0) {
-                window.location.reload();
+                window.location.href="/asset/approve/list/";
             }
             else {
                 alert(result.msg);

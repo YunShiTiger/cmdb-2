@@ -254,3 +254,9 @@ ZABBIX_INFO = [
 ]
 GRAFANA_URL = 'https://<user>:<pass>@grafana.localhost'
 SENTRY_URL = 'https://sentry.localhost'
+
+EMAIL_HOST = 'smtp.163.com'
+EMAIL_PORT = '25'
+EMAIL_HOST_USER = 'junkili@163.com'
+EMAIL_HOST_PASSWORD = 'EzbuyBest1'
+EMAIL_USERNAME = 'junkili'

@@ -154,7 +154,7 @@ $("#create_publishsheet").click(function () {
         },
         success: function (result) {
             if (result.code === 0) {
-                window.location.reload();
+                window.location.href="/asset/project/publishsheet/list/";
             }
             else {
                 alert(result.msg);
