@@ -1467,7 +1467,9 @@ def StartPublish(request):
                 break
 
         print 'StartPublish---publish_ok : ', publish_ok
+        print 'result : ', result
         publishsheet.publish_result = result
+        publishsheet.save()
 
         if publish_ok == '1':
             publishsheet.status = '4'
@@ -1503,8 +1505,6 @@ def StartPublish(request):
             errcode = 500
             msg = u'邮件发送失败'
 
-        print 'StartPublish^^^^^^^^^^result^^^^^^^^^^^^^^^'
-        print result
     data = dict(code=errcode, msg=msg, publish_result=result, publish_ok=publish_ok)
     return render(request, 'publish/publish_result.html', data)
 

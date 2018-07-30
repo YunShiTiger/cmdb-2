@@ -148,12 +148,15 @@ class goPublish:
 
             restart = ''
             try:
+                cmd_restart = 'supervisorctl restart %s' % self.services
                 restart = self.saltCmd.cmd('%s' % s.saltminion.saltname,'cmd.run',['supervisorctl restart %s' % self.services])
             except Exception as e:
                 print 'restart-----Exception : ', e.message
                 result.append({'run salt cmd FAILED': e.message})
             else:
                 print 'restart : ', restart
+                if not restart:
+                    restart = {'run cmd FAILED': cmd_restart}
                 result.append(restart)
 
             info = self.name + "(" + tower_url + ")"
@@ -169,10 +172,10 @@ class goPublish:
             except Exception as e:
                 print 'dingding_robo Exception : ', e.message
 
-        print '-------------------svn:',self.svn_revision
+        print '-------------------svn: ', self.svn_revision
         logs(self.username,self.ip,action,result)
         publish_logs(self.username,self.ip,self.tower_url,result)
-
+        print '-------------------result: ', result
         if self.svn_revision == 'head':
             # ROLLBACK to last successful revision if failed
             if not get_service_status(services):
@@ -182,6 +185,8 @@ class goPublish:
                     revert_info = {'Warning':'#####################Roll back to the previous version######################'}
                     result.append(revert_info)
                     result += self.deployGo(self.name, self.services, self.username, self.ip, self.tower_url, self.phone_number, svn_revision=goservice_rev_last[0], gotemplate_svn_revision=goservice_rev_last[1])
+                else:
+                    result.append({'Warning': "#####################Deploy failed, but no previous version, can't roll back#####################"})
             else:
                 try:
                     # get head revision from svn
