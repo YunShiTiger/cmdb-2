@@ -1648,6 +1648,7 @@ def sendEmail(request):
                 'sheet': sheet_dict,
                 'head_content': head_content,
                 'can_approve': can_approve,
+                'cmdb_url': CMDB_URL,
             }
 
             from_email = EMAIL_HOST_USER

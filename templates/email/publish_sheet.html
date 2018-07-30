@@ -20,8 +20,8 @@
                                 <tr>
                                     <td class="content-block">
                                         <h2 class="aligncenter"><a
-                                                {% if can_approve == '1' %}href="http://192.168.199.61:8012/asset/approve/init/?sheet_id={{ sheet.id }}"
-                                                {% else %}href="http://192.168.199.61:8012/asset/project/publishsheet/list/"{% endif %}> {{ head_content }}</a>
+                                                {% if can_approve == '1' %}href="{{ cmdb_url }}asset/approve/init/?sheet_id={{ sheet.id }}"
+                                                {% else %}href="{{ cmdb_url }}asset/project/publishsheet/list/"{% endif %}> {{ head_content }}</a>
                                         </h2>
                                     </td>
                                 </tr>
