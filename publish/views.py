@@ -1481,9 +1481,8 @@ def StartPublish(request):
             asset_utils.logs(user.username, ip, 'deploy publish sheet', 'failed')
 
         # 发邮件
+        to_list = [publishsheet.creator.email]
         if publishsheet.approval_level.name != '1':
-            to_list = [publishsheet.creator.email]
-
             try:
                 projectinfo_obj = models.ProjectInfo.objects.get(group=publishsheet.goservices.all()[0].group)
             except models.ProjectInfo.DoesNotExist:
@@ -1492,17 +1491,17 @@ def StartPublish(request):
                 if projectinfo_obj.mail_group.all():
                     to_list.extend([approver.email for approver in projectinfo_obj.mail_group.all() if approver.email])
 
-            url = CMDB_URL + 'asset/project/send/email/'
-            params = {
-                'sheet_id': publishsheet.id,
-                'head_content': u'发布单完成发布',
-                'to': to_list,
-                'can_approve': '2'
-            }
-            r = requests.get(url, params)
-            if r.status_code != 200:
-                errcode = 500
-                msg = u'邮件发送失败'
+        url = CMDB_URL + 'asset/project/send/email/'
+        params = {
+            'sheet_id': publishsheet.id,
+            'head_content': u'发布单完成发布',
+            'to': to_list,
+            'can_approve': '2'
+        }
+        r = requests.get(url, params)
+        if r.status_code != 200:
+            errcode = 500
+            msg = u'邮件发送失败'
 
         print 'StartPublish^^^^^^^^^^result^^^^^^^^^^^^^^^'
         print result
