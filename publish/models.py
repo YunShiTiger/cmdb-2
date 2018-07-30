@@ -50,7 +50,7 @@ class TimeSlotLevel(models.Model):
         ('7', u'周日'),
     )
     GLOBAL = (
-        ('1', u'自定义模板'),
+        ('1', u'自定义级别'),
         ('2', u'通用模板'),
     )
     is_global = models.CharField(choices=GLOBAL, max_length=32, verbose_name=u"是否通用模板", default='1')
