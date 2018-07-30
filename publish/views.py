@@ -1449,25 +1449,26 @@ def StartPublish(request):
         Publish = asset_utils.goPublish(env)
 
         result = []
-        print '^^^^^^^^^^^^^^^^^^start to publish'
+        print '^^^^^^^^^^^^^^^^^^start to publish, services : ', services
         for svc in services:
             try:
                 rst = Publish.deployGo(goproject_name, svc, request.user.username, ip, tower_url, phone_number)
             except Exception as e:
                 print 'StartPublish---e.message : ', e.message
                 publish_ok = '2'
+                result.extend({'run deployGo Exception': e.message})
             else:
-                result.extend(rst)
+                print '**********rst : ', rst
+                if rst:
+                    result.extend(rst)
 
             # break once deploy failed
             res = asset_utils.get_service_status(svc)
-            print 'StartPublish---res : ', res
             if not res:
                 print("deploy %s failed" % svc)
                 publish_ok = '2'
                 break
 
-        print 'StartPublish---publish_ok : ', publish_ok
         print 'result : ', result
         publishsheet.publish_result = result
         publishsheet.save()
@@ -1639,7 +1640,7 @@ def sendEmail(request):
             services_str = ', '.join(ser_list)
             gogroup_obj = services_objs[0].group
             env = services_objs[0].get_env_display()
-            sheet_dict.update({'services_str': services_str, 'gogroup': gogroup_obj.name, 'creator': sheet_obj.creator.username, 'env': env})
+            sheet_dict.update({'services_str': services_str, 'gogroup': gogroup_obj.name, 'creator': sheet_obj.creator.username, 'env': env, 'approval_level': sheet_obj.approval_level.get_name_display()})
 
             subject = u'cmdb发布系统'
             content = {

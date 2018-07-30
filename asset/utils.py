@@ -644,10 +644,13 @@ def dingding_robo(hostname='',project='',result='',username='',phone_number='',t
 
     try:
         if type(result) == dict:
-            if result.values()[0].find('ERROR') > 0 or result.values()[0].find('error') > 0 or result.values()[0].find('Skip') > 0:
-                errmsg = 'Failed'
+            if result:
+                if result.values()[0].find('ERROR') > 0 or result.values()[0].find('error') > 0 or result.values()[0].find('Skip') > 0:
+                    errmsg = 'Failed'
+                else:
+                    errmsg = 'Success'
             else:
-                errmsg = 'Success'
+                errmsg = 'Failed'
         elif type(result) == list:
             result = str(result)
             if result.find('ERROR') > 0 or result.find('error') > 0 or result.find('Skip') > 0:
@@ -660,7 +663,7 @@ def dingding_robo(hostname='',project='',result='',username='',phone_number='',t
             else:
                 errmsg = 'Success'
     except Exception, e:
-        print e
+        print 'dingding_robo --- Exception : ', e
         errmsg = 'Failed'
     current_time = getNowTime()
     if types == 1:
