@@ -125,6 +125,7 @@ class goPublish:
         services_info = goservices.objects.filter(env=self.env).filter(name=self.services)
         print 'deployGo---services_info : ', services_info
         action = ''
+        svn = ''
         for s in services_info:
             go_template = GOTemplate.objects.filter(project=s.group).filter(hostname=s.saltminion).first()
             print 's : ', go_template
@@ -214,14 +215,15 @@ class goPublish:
                     result.append({
                                       'Warning': "#####################Deploy failed, but no previous version, can't roll back#####################"})
             else:
-                try:
-                    # get head revision from svn
-                    rev_head = get_svn_revision(svn)
-                    gotemplate_rev_head = get_svn_revision(svn_gotemplate)
-                    update_rev_latest(self.name, rev_head, gotemplate_rev_head)
-                except Exception as e:
-                    print str(e)
-                    result.append({'save head revision FAILED': str(e)})
+                if svn:
+                    try:
+                        # get head revision from svn
+                        rev_head = get_svn_revision(svn)
+                        gotemplate_rev_head = get_svn_revision(svn_gotemplate)
+                        update_rev_latest(self.name, rev_head, gotemplate_rev_head)
+                    except Exception as e:
+                        print str(e)
+                        result.append({'save head revision FAILED': str(e)})
 
         return result
 
