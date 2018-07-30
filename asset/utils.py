@@ -119,6 +119,7 @@ class goPublish:
         #minionHost = commands.getstatusoutput('salt-key -l accepted')[1].split()[2:]
 
         services_info = goservices.objects.filter(env=self.env).filter(name=self.services)
+        action = ''
         for s in services_info:
             go_template = GOTemplate.objects.filter(project=s.group).filter(hostname=s.saltminion).first()
             # update conf file
@@ -158,10 +159,15 @@ class goPublish:
             info = self.name + "(" + tower_url + ")"
             if self.svn_revision == 'head':
                 action = 'deploy ' + info
-                dingding_robo(s.saltminion.saltname,info,restart,self.username,self.phone_number,types=1)
+                types = 1
             else:
                 action = 'revert ' + info
-                dingding_robo(s.saltminion.saltname, info, restart, self.username, self.phone_number, types=3)
+                types = 3
+
+            try:
+                dingding_robo(s.saltminion.saltname, info, restart, self.username, self.phone_number, types=types)
+            except Exception as e:
+                print 'dingding_robo Exception : ', e.message
 
         print '-------------------svn:',self.svn_revision
         logs(self.username,self.ip,action,result)
