@@ -21,6 +21,7 @@
                                     <td class="content-block">
                                         <h2 class="aligncenter"><a
                                                 {% if can_approve == '1' %}href="{{ cmdb_url }}asset/approve/init/?sheet_id={{ sheet.id }}"
+                                                {% elif can_approve == '3' %}href="{{ cmdb_url }}asset/project/publishsheet/publish/result/?sheet_id={{ sheet.id }}"
                                                 {% else %}href="{{ cmdb_url }}asset/project/publishsheet/list/"{% endif %}> {{ head_content }}</a>
                                         </h2>
                                     </td>

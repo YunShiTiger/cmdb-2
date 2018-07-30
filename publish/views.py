@@ -1504,7 +1504,7 @@ def StartPublish(request):
             'sheet_id': publishsheet.id,
             'head_content': u'发布单完成发布',
             'to': to_list,
-            'can_approve': '2'
+            'can_approve': '3'
         }
         r = requests.get(url, params)
         if r.status_code != 200:
