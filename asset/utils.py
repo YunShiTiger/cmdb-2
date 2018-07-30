@@ -55,6 +55,7 @@ def update_rev_latest(name, goproject_rev, gotemplate_rev):
 
 
 def get_service_status(service_name):
+    print '$$$$$$$$$$$get_service_status'
     # Go Service model instance
     _srv = goservices.objects.filter(name=service_name)
     if not _srv:
@@ -119,15 +120,19 @@ class goPublish:
         #minionHost = commands.getstatusoutput('salt-key -l accepted')[1].split()[2:]
 
         services_info = goservices.objects.filter(env=self.env).filter(name=self.services)
+        print 'deployGo---services_info : ', services_info
         action = ''
         for s in services_info:
             go_template = GOTemplate.objects.filter(project=s.group).filter(hostname=s.saltminion).first()
+            print 's : ', go_template
+            print 'go_template : ', go_template
             # update conf file
 
             if go_template:
                 svn_gotemplate = self.saltCmd.cmd('%s' % s.saltminion.saltname, 'cmd.run',
                     ['svn update -r%s --username=%s --password=%s --non-interactive %s && svn log -l 1 --username=%s --password=%s --non-interactive %s'
                     % (self.gotemplate_svn_revision, go_template.username, go_template.password, go_template.localpath, go_template.username, go_template.password, go_template.localpath)])
+                print 'if svn_gotemplate : ', svn_gotemplate
             else:
                 svn_gotemplate = {'Warning':'#####################Not gotemplate file######################'}
             result.append(svn_gotemplate)
@@ -181,7 +186,6 @@ class goPublish:
             # ROLLBACK to last successful revision if failed
             if not get_service_status(services):
                 goservice_rev_last = get_rev_latest(self.name)
-                print '#####goservice_rev_last.gotemplate_last_rev',goservice_rev_last
                 if goservice_rev_last:
                     revert_info = {'Warning':'#####################Roll back to the previous version######################'}
                     result.append(revert_info)
