@@ -681,6 +681,7 @@ def dingding_robo(hostname='',project='',result='',username='',phone_number='',t
              ],
              }
         }
+    print 'dingding_robo data : '
     print data
     try:
         #requests.post(url,headers=headers,data=json.dumps(data),timeout=3)

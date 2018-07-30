@@ -1449,6 +1449,7 @@ def StartPublish(request):
         Publish = asset_utils.goPublish(env)
 
         result = []
+        print '^^^^^^^^^^^^^^^^^^start to publish'
         for svc in services:
             try:
                 rst = Publish.deployGo(goproject_name, svc, request.user.username, ip, tower_url, phone_number)

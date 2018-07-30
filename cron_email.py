@@ -74,7 +74,7 @@ if __name__ == "__main__":
     params = {
         'sheet_id': 1,
         'head_content': u'发布单已超时30分钟，请尽快发布',
-        'to': ['zhangyiling@ezbuy.com'],
+        'to': ['huangyao@ezbuy.com'],
         'can_approve': '2'
     }
     r = requests.get(url, params)
