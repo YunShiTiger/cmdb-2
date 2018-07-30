@@ -263,7 +263,7 @@ EMAIL_USER = 'junkili'
 EMAIL_USE_TLS = True
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
-CMDB_URL = 'http://192.168.199.61:8010/'
+CMDB_URL = 'http://192.168.199.61:8012/'
 
 # EMAIL_HOST = 'smtp.exmail.qq.com'
 # EMAIL_PORT = 465
