@@ -630,7 +630,7 @@ def PublishSheetDoneList(request):
     page_1 = request.GET.get('page_1', 1)
     page_2 = request.GET.get('page_2', 1)
     page_3 = request.GET.get('page_3', 1)
-    publishsheets = models.PublishSheet.objects.filter(Q(status='4') | Q(status='5') | Q(status='6')).order_by('publish_date', 'publish_time')
+    publishsheets = models.PublishSheet.objects.filter(Q(status='4') | Q(status='5') | Q(status='6')).order_by('-publish_date', '-publish_time')
 
     done_list = []
     outtime_notpublish_list = []
