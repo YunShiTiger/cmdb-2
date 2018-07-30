@@ -930,7 +930,7 @@ def createPublishSheet(request):
 
         publishsheet_obj.approval_level = approval_level
         publishsheet_obj.save()
-        res_log = 'Successfully create Publish Sheet, id : {0}'.format(publishsheet_obj.id)
+        res_log = 'Successfully create Publish Sheet, id : {0}, gogroup: {1}'.format(publishsheet_obj.id, gogroup_obj.name)
         asset_utils.logs(user.username, ip, 'create Publish Sheet', res_log)
         print '^^^^^save publishsheet_obj ok，id ----', publishsheet_obj.id
 
@@ -1006,7 +1006,8 @@ def PublishSheetDelete(request):
         if publish_obj.creator:
             if publish_obj.creator == user:
                 publish_obj.delete()
-                res_log = 'Successfully delete Publish Sheet, id : {0}'.format(publish_obj.id)
+                project_name = publish_obj.goservices.all()[0].group.name
+                res_log = 'Successfully delete Publish Sheet, id : {0}, gogroup: {1}'.format(publish_obj.id, project_name)
                 asset_utils.logs(user.username, ip, 'delete Publish Sheet', res_log)
             else:
                 errcode = 500
@@ -1014,7 +1015,8 @@ def PublishSheetDelete(request):
         else:
             print 'no creator'
             publish_obj.delete()
-            res_log = 'Successfully delete Publish Sheet, id : {0}'.format(publish_obj.id)
+            project_name = publish_obj.goservices.all()[0].group.name
+            res_log = 'Successfully delete Publish Sheet, id : {0}, gogroup: {1}'.format(publish_obj.id, project_name)
             asset_utils.logs(user.username, ip, 'delete Publish Sheet', res_log)
 
     data = dict(code=errcode, msg=msg)
