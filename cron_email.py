@@ -70,14 +70,14 @@ if __name__ == "__main__":
                     errcode = 500
                     msg = u'邮件发送失败'
 
-    url = CMDB_URL + 'asset/project/send/email/'
-    params = {
-        'sheet_id': 1,
-        'head_content': u'发布单已超时30分钟，请尽快发布',
-        'to': ['huangyao@ezbuy.com'],
-        'can_approve': '2'
-    }
-    r = requests.get(url, params)
-    if r.status_code != 200:
-        errcode = 500
-        msg = u'邮件发送失败'
+    # url = CMDB_URL + 'asset/project/send/email/'
+    # params = {
+    #     'sheet_id': 1,
+    #     'head_content': u'发布单已超时30分钟，请尽快发布',
+    #     'to': ['huangyao@ezbuy.com'],
+    #     'can_approve': '2'
+    # }
+    # r = requests.get(url, params)
+    # if r.status_code != 200:
+    #     errcode = 500
+    #     msg = u'邮件发送失败'

@@ -51,7 +51,7 @@
                                             </tr>
                                             <tr>
                                                 <td>紧急原因</td>
-                                                <td class="alignright">{{ sheet.reason }}</td>
+                                                <td class="alignright">{% if sheet.reason %}{{ sheet.reason }}{% else %}无{% endif %}</td>
                                             </tr>
                                         </table>
                                     </td>
