@@ -155,9 +155,10 @@ class goPublish:
                 result.append({'run salt cmd FAILED': e.message})
             else:
                 print 'restart : ', restart
-                if not restart:
-                    restart = {'run cmd FAILED': cmd_restart}
-                result.append(restart)
+                # if not restart:
+                #     restart = {'run cmd FAILED': cmd_restart}
+                if restart:
+                    result.append(restart)
 
             info = self.name + "(" + tower_url + ")"
             if self.svn_revision == 'head':
