@@ -10,6 +10,7 @@ from django.contrib.auth.models import User
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.core.mail import EmailMultiAlternatives, get_connection, EmailMessage, send_mail
 from django.template import Context, loader
+from django.db.models import Q
 
 from publish import models
 from publish.utils import serialize_instance, cut_str, send_mail_thread
@@ -444,7 +445,7 @@ def PublishSheetList(request):
     errcode = 0
     msg = 'ok'
     user = request.user
-    publishsheets = models.PublishSheet.objects.all().order_by('publish_date', 'publish_time')
+    publishsheets = models.PublishSheet.objects.filter(Q(status='1') | Q(status='2') | Q(status='3')).order_by('publish_date', 'publish_time')
 
     tobe_approved_list = []
     approve_refused_list = []
@@ -629,7 +630,7 @@ def PublishSheetDoneList(request):
     page_1 = request.GET.get('page_1', 1)
     page_2 = request.GET.get('page_2', 1)
     page_3 = request.GET.get('page_3', 1)
-    publishsheets = models.PublishSheet.objects.all().order_by('publish_date', 'publish_time')
+    publishsheets = models.PublishSheet.objects.filter(Q(status='4') | Q(status='5') | Q(status='6')).order_by('publish_date', 'publish_time')
 
     done_list = []
     outtime_notpublish_list = []
@@ -1511,8 +1512,6 @@ def StartPublish(request):
 
 @login_required
 def PublishResult(request):
-    user = request.user
-    ip = request.META['REMOTE_ADDR']
     sheet_id = int(request.GET['sheet_id'])
     errcode = 0
     msg = 'ok'

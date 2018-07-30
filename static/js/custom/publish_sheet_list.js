@@ -88,16 +88,17 @@ function publish_sheet_detail(sheet_id, can_delete=2) {
 
 function start_publish(sheet_id) {
     let url = '/asset/project/publishsheet/publish/start/?sheet_id='+sheet_id;
+    let result_url = '/asset/project/publishsheet/publish/result/?sheet_id='+sheet_id;
     $.ajax({
         url: url,
         type: "GET",
         beforeSend: function(){
             init_tab7();
-            console.log(url);
-            window.location.href=url;
+            console.log(result_url);
+            window.location.href=result_url;
         },
         success: function (result) {
-            window.location.href=url;
+            console.log(result);
         },
         error: function () {
             alert('失败');
