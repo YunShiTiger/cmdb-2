@@ -195,7 +195,7 @@ class goPublish:
             except Exception as e:
                 print 'dingding_robo Exception : ', e.message
 
-        print '-------------------svn: ', self.svn_revision
+        print '-------------------svn_revision: ', self.svn_revision
         logs(self.username, self.ip, action, result)
         publish_logs(self.username, self.ip, self.tower_url, result)
         print '-------------------result: ', result
