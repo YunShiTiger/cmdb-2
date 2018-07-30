@@ -128,10 +128,12 @@ class goPublish:
             # update conf file
 
             if go_template:
-                temp_cmd = 'svn update -r%s --username=%s --password=%s --non-interactive %s && svn log -l 1 --username=%s --password=%s --non-interactive %s' % (self.gotemplate_svn_revision, go_template.username,
+                temp_cmd = '%s' % s.saltminion.saltname, 'cmd.run', [
+                                                      'svn update -r%s --username=%s --password=%s --non-interactive %s && svn log -l 1 --username=%s --password=%s --non-interactive %s'
+                                                      % (self.gotemplate_svn_revision, go_template.username,
                                                          go_template.password, go_template.localpath,
                                                          go_template.username, go_template.password,
-                                                         go_template.localpath)
+                                                         go_template.localpath)]
                 print 'temp_run_cmd : ', temp_cmd
                 svn_gotemplate = self.saltCmd.cmd('%s' % s.saltminion.saltname, 'cmd.run',
                                                   [
@@ -164,7 +166,8 @@ class goPublish:
 
             restart = ''
             try:
-                cmd_restart = 'supervisorctl restart %s' % self.services
+                cmd_restart = '%s' % s.saltminion.saltname, 'cmd.run', ['supervisorctl restart %s' % self.services]
+                print 'cmd_restart : ', cmd_restart
                 restart = self.saltCmd.cmd('%s' % s.saltminion.saltname, 'cmd.run',
                                            ['supervisorctl restart %s' % self.services])
             except Exception as e:
@@ -182,6 +185,7 @@ class goPublish:
                 action = 'revert ' + info
                 types = 3
 
+            print 'before dingdo_robo, restart: ', restart
             try:
                 dingding_robo(s.saltminion.saltname, info, restart, self.username, self.phone_number, types=types)
             except Exception as e:
@@ -665,11 +669,11 @@ def dingding_robo(hostname='', project='', result='', username='', phone_number=
     headers = {'Content-Type': 'application/json'}
     hs = str(hostname) + " by " + str(username)
 
+    errmsg = 'Success'
     try:
         if type(result) == dict:
             if result:
-                if result.values()[0].find('ERROR') > 0 or result.values()[0].find('error') > 0 or result.values()[
-                    0].find('Skip') > 0:
+                if result.values()[0].find('ERROR') > 0 or result.values()[0].find('error') > 0 or result.values()[0].find('Skip') > 0:
                     errmsg = 'Failed'
                 else:
                     errmsg = 'Success'
