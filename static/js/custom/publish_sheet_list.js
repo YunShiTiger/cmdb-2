@@ -95,10 +95,10 @@ function start_publish(sheet_id) {
         beforeSend: function(){
             init_tab7();
             console.log(result_url);
-            window.location.href=result_url;
         },
         success: function (result) {
             console.log(result);
+            window.location.href=result_url;
         },
         error: function () {
             alert('失败');

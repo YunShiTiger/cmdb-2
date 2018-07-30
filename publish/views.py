@@ -99,7 +99,8 @@ def createProject(request):
                     for mailgroup in mailgroup_list:
                         project_obj.mail_group.add(mailgroup)
 
-                asset_utils.logs(user.username, ip, 'create project info', 'success')
+                log_res = 'Successfully create Initialization Info of gogroup : {0}'.format(project_obj.group.name)
+                asset_utils.logs(user.username, ip, 'create Initialization Info', log_res)
 
             else:
                 print 'already exist'
@@ -134,11 +135,13 @@ def projectDelete(request):
 
         if user == project_obj.creator:
             project_obj.delete()
-            asset_utils.logs(user.username, ip, 'delete project info', 'success')
+            log_res = 'Successfully delete Initialization Info of gogroup : {0}'.format(project_obj.group.name)
+            asset_utils.logs(user.username, ip, 'delete Initialization Info', log_res)
         else:
             owner_list = project_obj.owner.all()
             if user in owner_list:
-                asset_utils.logs(user.username, ip, 'delete project info', 'success')
+                log_res = 'Successfully delete Initialization Info of gogroup : {0}'.format(project_obj.group.name)
+                asset_utils.logs(user.username, ip, 'delete Initialization Info', log_res)
                 project_obj.delete()
             else:
                 errcode = 500
@@ -257,15 +260,16 @@ def LevelCreate(request):
                         errcode = 500
                         msg = u'项目 {0} 无一级审批人'.format(project_obj.group.name)
                         data = dict(code=errcode, msg=msg)
-                        asset_utils.logs(user.username, ip, 'create project--approval level, no first approver',
-                                         'failed')
+                        res_log = 'Failed to create Approve Level of gogroup : {0}. Reason: no first approver'.format(project_obj.group.name)
+                        asset_utils.logs(user.username, ip, 'create Approve Level', res_log)
                         return HttpResponse(json.dumps(data), content_type='application/json')
                     if approval_level == '3' and not second_approver_objs:
                         errcode = 500
                         msg = u'项目 {0} 无二级审批人'.format(project_obj.group.name)
                         data = dict(code=errcode, msg=msg)
-                        asset_utils.logs(user.username, ip, 'create project--approval level, no second approver',
-                                         'failed')
+                        res_log = 'Failed to create Approve Level of gogroup : {0}. Reason: no second approver'.format(
+                            project_obj.group.name)
+                        asset_utils.logs(user.username, ip, 'create Approve Level', res_log)
                         return HttpResponse(json.dumps(data), content_type='application/json')
 
                     try:
@@ -284,8 +288,8 @@ def LevelCreate(request):
                                                                               creator=user)
                         if time_obj not in old_time_objs:
                             project_obj.timeslot_level.add(time_obj[0])
-                            asset_utils.logs(user.username, ip, 'create project--approval level',
-                                             'success')
+                            res_log = 'Successfully create Approve Level of gogroup: {0}'.format(project_obj.group.name)
+                            asset_utils.logs(user.username, ip, 'create Approve Level', res_log)
             else:
                 print 'radio 2'
                 old_time_objs = project_obj.timeslot_level.all()
@@ -296,22 +300,24 @@ def LevelCreate(request):
                         errcode = 500
                         msg = u'项目 {0} 无一级审批人'.format(project_obj.group.name)
                         data = dict(code=errcode, msg=msg)
-                        asset_utils.logs(user.username, ip, 'create project--approval level, no first approver',
-                                         'failed')
+                        res_log = 'Failed to create Approve Level of gogroup : {0}. Reason: no first approver'.format(
+                            project_obj.group.name)
+                        asset_utils.logs(user.username, ip, 'create Approve Level', res_log)
                         return HttpResponse(json.dumps(data), content_type='application/json')
                     if time_obj.approval_level.name == '3' and not second_approver_objs:
                         errcode = 500
                         msg = u'项目 {0} 无二级审批人'.format(project_obj.group.name)
                         data = dict(code=errcode, msg=msg)
-                        asset_utils.logs(user.username, ip, 'create project--approval level, no second approver',
-                                         'failed')
+                        res_log = 'Failed to create Approve Level of gogroup : {0}. Reason: no second approver'.format(
+                            project_obj.group.name)
+                        asset_utils.logs(user.username, ip, 'create Approve Level', res_log)
                         return HttpResponse(json.dumps(data), content_type='application/json')
 
                     print 'LevelCreate--time_obj : ', time_obj
                     if time_obj not in old_time_objs:
                         print 'LevelCreate--add'
-                        asset_utils.logs(user.username, ip, 'create project--approval level',
-                                         'success')
+                        res_log = 'Successfully create Approve Level of gogroup: {0}'.format(project_obj.group.name)
+                        asset_utils.logs(user.username, ip, 'create Approve Level', res_log)
                         project_obj.timeslot_level.add(time_obj)
 
     data = dict(code=errcode, msg=msg)
@@ -343,7 +349,8 @@ def LevelDelete(request):
             # if projectinfo.creator == user:
             #     print 'project info creator == user'
             projectinfo.timeslot_level.remove(timeslot_obj)
-            asset_utils.logs(user.username, ip, 'delete project--approval level', 'success')
+            res_log = 'Successfully delete Approve Level of gogroup : {0}'.format(projectinfo.group.name)
+            asset_utils.logs(user.username, ip, 'delete Approve Level', res_log)
 
     data = dict(code=errcode, msg=msg)
     return HttpResponse(json.dumps(data), content_type='application/json')
@@ -399,7 +406,8 @@ def templateCreate(request):
                                                            start_time=time_start, end_time=time_end,
                                                            approval_level=level_obj, is_global='2',
                                                            creator=user)
-            asset_utils.logs(user.username, ip, 'create approval level template', 'success')
+            res_log = 'Successfully create Approve Level Template of level : {0}'.format(level_obj.get_name_display())
+            asset_utils.logs(user.username, ip, 'create Approve Level Template', res_log)
             print 'create template ok : ', time_obj.id
         else:
             errcode = 500
@@ -424,13 +432,16 @@ def templateDelete(request):
     else:
         if timeslot_obj.creator:
             if timeslot_obj.creator == user:
-                asset_utils.logs(user.username, ip, 'delete approval level template', 'success')
+                res_log = 'Successfully delete Approve Level Template of level : {0}'.format(timeslot_obj.approval_level.get_name_display())
+                asset_utils.logs(user.username, ip, 'delete Approve Level Template', res_log)
                 timeslot_obj.delete()
             else:
                 errcode = 500
                 msg = u'你不是创建人，不能删除'
         else:
-            asset_utils.logs(user.username, ip, 'delete approval level template', 'success')
+            res_log = 'Successfully delete Approve Level Template of level : {0}'.format(
+                timeslot_obj.approval_level.get_name_display())
+            asset_utils.logs(user.username, ip, 'delete Approve Level Template', res_log)
             timeslot_obj.delete()
 
     data = dict(code=errcode, msg=msg)
@@ -919,7 +930,8 @@ def createPublishSheet(request):
 
         publishsheet_obj.approval_level = approval_level
         publishsheet_obj.save()
-        asset_utils.logs(user.username, ip, 'create publish sheet', 'success')
+        res_log = 'Successfully create Publish Sheet, id : {0}'.format(publishsheet_obj.id)
+        asset_utils.logs(user.username, ip, 'create Publish Sheet', res_log)
         print '^^^^^save publishsheet_obj ok，id ----', publishsheet_obj.id
 
         if projectinfo_obj:
@@ -994,14 +1006,16 @@ def PublishSheetDelete(request):
         if publish_obj.creator:
             if publish_obj.creator == user:
                 publish_obj.delete()
-                asset_utils.logs(user.username, ip, 'delete publish sheet', 'success')
+                res_log = 'Successfully delete Publish Sheet, id : {0}'.format(publish_obj.id)
+                asset_utils.logs(user.username, ip, 'delete Publish Sheet', res_log)
             else:
                 errcode = 500
                 msg = u'你不是创建人，不能删除'
         else:
             print 'no creator'
             publish_obj.delete()
-            asset_utils.logs(user.username, ip, 'delete publish sheet', 'success')
+            res_log = 'Successfully delete Publish Sheet, id : {0}'.format(publish_obj.id)
+            asset_utils.logs(user.username, ip, 'delete Publish Sheet', res_log)
 
     data = dict(code=errcode, msg=msg)
     return HttpResponse(json.dumps(data), content_type='application/json')
@@ -1275,7 +1289,8 @@ def ApproveJudge(request):
                 errcode = 500
                 msg = u'邮件发送失败'
 
-            asset_utils.logs(user.username, ip, 'first approve publish sheet', 'success')
+            res_log = 'Successfully approve Publish Sheet first time, approve result : {0}'.format(publish_history.get_approve_status_display())
+            asset_utils.logs(user.username, ip, 'approve Publish Sheet first time', res_log)
         else:
             # 被第一审批通过，现在已是第二次审批
             publish_history.approve_count = '2'
@@ -1312,7 +1327,9 @@ def ApproveJudge(request):
                 errcode = 500
                 msg = u'邮件发送失败'
 
-            asset_utils.logs(user.username, ip, 'second approve publish sheet', 'success')
+            res_log = 'Successfully approve Publish Sheet second time, approve result : {0}'.format(
+                publish_history.get_approve_status_display())
+            asset_utils.logs(user.username, ip, 'approve Publish Sheet second time', res_log)
 
     data = dict(code=errcode, msg=msg)
     return HttpResponse(json.dumps(data), content_type='application/json')
@@ -1481,12 +1498,14 @@ def StartPublish(request):
             publishsheet.status = '4'
             publishsheet.if_publish_ok = '1'
             publishsheet.save()
-            asset_utils.logs(user.username, ip, 'deploy publish sheet', 'success')
+            res_log = 'Successfully deploy Publish Sheet, gogroup : {0}'.format(goproject_name)
+            asset_utils.logs(user.username, ip, 'deploy Publish Sheet', res_log)
         else:
             publishsheet.status = '4'
             publishsheet.if_publish_ok = '2'
             publishsheet.save()
-            asset_utils.logs(user.username, ip, 'deploy publish sheet', 'failed')
+            res_log = 'Failed to deploy Publish Sheet, gogroup : {0}'.format(goproject_name)
+            asset_utils.logs(user.username, ip, 'deploy Publish Sheet', res_log)
 
         # 发邮件
         to_list = [publishsheet.creator.email]
