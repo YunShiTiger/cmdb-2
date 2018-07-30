@@ -1459,6 +1459,10 @@ def StartPublish(request):
                 result.extend({'run deployGo Exception': e.message})
             else:
                 print '**********rst : ', rst
+                for tmp_dict in rst:
+                    for k in tmp_dict:
+                        if 'ERROR' in tmp_dict[k] or 'error' in tmp_dict[k] or 'Skip' in tmp_dict[k]:
+                            publish_ok = '2'
                 if rst:
                     result.extend(rst)
 

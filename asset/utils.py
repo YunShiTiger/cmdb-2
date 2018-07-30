@@ -123,13 +123,13 @@ class goPublish:
         # minionHost = commands.getstatusoutput('salt-key -l accepted')[1].split()[2:]
 
         services_info = goservices.objects.filter(env=self.env).filter(name=self.services)
-        print 'deployGo---services_info : ', services_info
+        # print 'deployGo---services_info : ', services_info
         action = ''
         svn = ''
         for s in services_info:
             go_template = GOTemplate.objects.filter(project=s.group).filter(hostname=s.saltminion).first()
-            print 's : ', go_template
-            print 'go_template : ', go_template
+            # print 's : ', go_template
+            # print 'go_template : ', go_template
             # update conf file
 
             if go_template:
