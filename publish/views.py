@@ -1469,7 +1469,7 @@ def StartPublish(request):
                 publish_ok = '2'
                 break
 
-        print 'result : ', result
+        # print 'result : ', result
         publishsheet.publish_result = result
         publishsheet.save()
 

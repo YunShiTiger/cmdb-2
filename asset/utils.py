@@ -65,9 +65,13 @@ def get_service_status(service_name):
         _svd = gostatus.objects.filter(hostname=i.saltminion.id).first()
         if _svd:
             try:
+                super_server = 'http://%s:%s@%s:%s/RPC2' % (_svd.supervisor_username, _svd.supervisor_password,
+                                                                  _svd.supervisor_host, _svd.supervisor_port)
+                print 'super_server : ', super_server
                 s = xmlrpclib.Server('http://%s:%s@%s:%s/RPC2' % (_svd.supervisor_username, _svd.supervisor_password,
                                                                   _svd.supervisor_host, _svd.supervisor_port))
                 info = s.supervisor.getProcessInfo(service_name)
+                print 'info : ', info
                 if info['state'] in [30, 100, 200, 1000]:
                     return False
                 else:
@@ -128,13 +132,13 @@ class goPublish:
             # update conf file
 
             if go_template:
-                temp_cmd = '%s' % s.saltminion.saltname, 'cmd.run', [
-                                                      'svn update -r%s --username=%s --password=%s --non-interactive %s && svn log -l 1 --username=%s --password=%s --non-interactive %s'
-                                                      % (self.gotemplate_svn_revision, go_template.username,
-                                                         go_template.password, go_template.localpath,
-                                                         go_template.username, go_template.password,
-                                                         go_template.localpath)]
-                print 'temp_run_cmd : ', temp_cmd
+                # temp_cmd = '%s' % s.saltminion.saltname, 'cmd.run', [
+                #                                       'svn update -r%s --username=%s --password=%s --non-interactive %s && svn log -l 1 --username=%s --password=%s --non-interactive %s'
+                #                                       % (self.gotemplate_svn_revision, go_template.username,
+                #                                          go_template.password, go_template.localpath,
+                #                                          go_template.username, go_template.password,
+                #                                          go_template.localpath)]
+                # print 'temp_run_cmd : ', temp_cmd
                 svn_gotemplate = self.saltCmd.cmd('%s' % s.saltminion.saltname, 'cmd.run',
                                                   [
                                                       'svn update -r%s --username=%s --password=%s --non-interactive %s && svn log -l 1 --username=%s --password=%s --non-interactive %s'
@@ -142,7 +146,7 @@ class goPublish:
                                                          go_template.password, go_template.localpath,
                                                          go_template.username, go_template.password,
                                                          go_template.localpath)])
-                print 'if svn_gotemplate : ', svn_gotemplate
+                # print 'if svn_gotemplate : ', svn_gotemplate
             else:
                 svn_gotemplate = {'Warning': '#####################Not gotemplate file######################'}
             result.append(svn_gotemplate)
@@ -166,8 +170,8 @@ class goPublish:
 
             restart = ''
             try:
-                cmd_restart = '%s' % s.saltminion.saltname, 'cmd.run', ['supervisorctl restart %s' % self.services]
-                print 'cmd_restart : ', cmd_restart
+                # cmd_restart = '%s' % s.saltminion.saltname, 'cmd.run', ['supervisorctl restart %s' % self.services]
+                # print 'cmd_restart : ', cmd_restart
                 restart = self.saltCmd.cmd('%s' % s.saltminion.saltname, 'cmd.run',
                                            ['supervisorctl restart %s' % self.services])
             except Exception as e:
