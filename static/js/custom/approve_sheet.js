@@ -30,6 +30,9 @@ function agreeButton(publish_id) {
         data: data,
         contentType: 'application/x-www-form-urlencoded',
         traditional: true,
+        beforeSend: function(){
+            $("#agreeButtonId").attr({disabled: "disabled"});
+        },
         success: function (result) {
             if (result.code === 0) {
                 window.location.href="/asset/approve/list/";
@@ -37,6 +40,7 @@ function agreeButton(publish_id) {
             else {
                 alert(result.msg);
             }
+            $("#agreeButtonId").removeAttr("disabled");
         },
         error: function () {
             alert('失败');

@@ -17,6 +17,7 @@ from publish.utils import serialize_instance, cut_str, send_mail_thread
 from asset import models as asset_models
 from asset import utils as asset_utils
 from mico.settings import EMAIL_HOST, EMAIL_PORT, EMAIL_HOST_USER, EMAIL_HOST_PASSWORD, EMAIL_USER, CMDB_URL
+from asynchronous_send_mail import send_mail as async_send_mail
 
 
 @login_required
@@ -260,7 +261,8 @@ def LevelCreate(request):
                         errcode = 500
                         msg = u'项目 {0} 无一级审批人'.format(project_obj.group.name)
                         data = dict(code=errcode, msg=msg)
-                        res_log = 'Failed to create Approve Level of gogroup : {0}. Reason: no first approver'.format(project_obj.group.name)
+                        res_log = 'Failed to create Approve Level of gogroup : {0}. Reason: no first approver'.format(
+                            project_obj.group.name)
                         asset_utils.logs(user.username, ip, 'create Approve Level', res_log)
                         return HttpResponse(json.dumps(data), content_type='application/json')
                     if approval_level == '3' and not second_approver_objs:
@@ -432,7 +434,8 @@ def templateDelete(request):
     else:
         if timeslot_obj.creator:
             if timeslot_obj.creator == user:
-                res_log = 'Successfully delete Approve Level Template of level : {0}'.format(timeslot_obj.approval_level.get_name_display())
+                res_log = 'Successfully delete Approve Level Template of level : {0}'.format(
+                    timeslot_obj.approval_level.get_name_display())
                 asset_utils.logs(user.username, ip, 'delete Approve Level Template', res_log)
                 timeslot_obj.delete()
             else:
@@ -456,7 +459,8 @@ def PublishSheetList(request):
     errcode = 0
     msg = 'ok'
     user = request.user
-    publishsheets = models.PublishSheet.objects.filter(Q(status='1') | Q(status='2') | Q(status='3')).order_by('publish_date', 'publish_time')
+    publishsheets = models.PublishSheet.objects.filter(Q(status='1') | Q(status='2') | Q(status='3')).order_by(
+        'publish_date', 'publish_time')
 
     tobe_approved_list = []
     approve_refused_list = []
@@ -641,7 +645,8 @@ def PublishSheetDoneList(request):
     page_1 = request.GET.get('page_1', 1)
     page_2 = request.GET.get('page_2', 1)
     page_3 = request.GET.get('page_3', 1)
-    publishsheets = models.PublishSheet.objects.filter(Q(status='4') | Q(status='5') | Q(status='6')).order_by('-publish_date', '-publish_time')
+    publishsheets = models.PublishSheet.objects.filter(Q(status='4') | Q(status='5') | Q(status='6')).order_by(
+        '-publish_date', '-publish_time')
 
     done_list = []
     outtime_notpublish_list = []
@@ -930,7 +935,8 @@ def createPublishSheet(request):
 
         publishsheet_obj.approval_level = approval_level
         publishsheet_obj.save()
-        res_log = 'Successfully create Publish Sheet, id : {0}, gogroup: {1}'.format(publishsheet_obj.id, gogroup_obj.name)
+        res_log = 'Successfully create Publish Sheet, id : {0}, gogroup: {1}'.format(publishsheet_obj.id,
+                                                                                     gogroup_obj.name)
         asset_utils.logs(user.username, ip, 'create Publish Sheet', res_log)
         print '^^^^^save publishsheet_obj ok，id ----', publishsheet_obj.id
 
@@ -955,36 +961,71 @@ def createPublishSheet(request):
             for reviewer_obj in reviewer_objs:
                 publishsheet_obj.reviewer.add(reviewer_obj)
 
+        subject = u'cmdb发布系统'
+        ser_list = goservices_objs.order_by('name').values_list('name', flat=True)
+        services_str = ', '.join(ser_list)
+        env = goservices_objs[0].get_env_display()
+        sheet_dict = {
+            'services_str': services_str,
+            'gogroup': project_name,
+            'creator': user.username,
+            'env': env,
+            'approval_level': approval_level.get_name_display(),
+            'id': publishsheet_obj.id,
+            'publish_date': publishsheet_obj.publish_date,
+            'publish_time': publishsheet_obj.publish_time,
+            'reason': publishsheet_obj.reason,
+        }
         if publishsheet_obj.approval_level.name != '1':
             if projectinfo_obj:
                 # 发邮件给一级审批人
                 to_list = [approver.email for approver in publishsheet_obj.first_approver.all() if approver.email]
-                url = CMDB_URL + 'asset/project/send/email/'
-                params = {
-                    'sheet_id': publishsheet_obj.id,
+                content = {
+                    'title': subject,
+                    'sheet': sheet_dict,
                     'head_content': u'请审批发布单',
-                    'to': to_list,
-                    'can_approve': '1'
+                    'can_approve': '1',
+                    'cmdb_url': CMDB_URL,
                 }
-                r = requests.get(url, params)
-                if r.status_code != 200:
-                    errcode = 500
-                    msg = u'给一级审批人的邮件发送失败'
+                email_template_name = 'email/publish_sheet.html'
+                email_content = loader.render_to_string(email_template_name, content)
+                async_send_mail(subject, '', EMAIL_HOST_USER, to_list, fail_silently=False, html=email_content)
+                # url = CMDB_URL + 'asset/project/send/email/'
+                # params = {
+                #     'sheet_id': publishsheet_obj.id,
+                #     'head_content': u'请审批发布单',
+                #     'to': to_list,
+                #     'can_approve': '1'
+                # }
+                # r = requests.get(url, params)
+                # if r.status_code != 200:
+                #     errcode = 500
+                #     msg = u'给一级审批人的邮件发送失败'
 
                 # 发邮件给项目的邮件组
                 if projectinfo_obj.mail_group.all():
                     to_list = [approver.email for approver in projectinfo_obj.mail_group.all() if approver.email]
-                    url = CMDB_URL + 'asset/project/send/email/'
-                    params = {
-                        'sheet_id': publishsheet_obj.id,
+                    content = {
+                        'title': subject,
+                        'sheet': sheet_dict,
                         'head_content': u'新增发布单',
-                        'to': to_list,
-                        'can_approve': '2'
+                        'can_approve': '2',
+                        'cmdb_url': CMDB_URL,
                     }
-                    r = requests.get(url, params)
-                    if r.status_code != 200:
-                        errcode = 500
-                        msg = u'给通知邮件组的邮件发送失败'
+                    email_template_name = 'email/publish_sheet.html'
+                    email_content = loader.render_to_string(email_template_name, content)
+                    async_send_mail(subject, '', EMAIL_HOST_USER, to_list, fail_silently=False, html=email_content)
+                    # url = CMDB_URL + 'asset/project/send/email/'
+                    # params = {
+                    #     'sheet_id': publishsheet_obj.id,
+                    #     'head_content': u'新增发布单',
+                    #     'to': to_list,
+                    #     'can_approve': '2'
+                    # }
+                    # r = requests.get(url, params)
+                    # if r.status_code != 200:
+                    #     errcode = 500
+                    #     msg = u'给通知邮件组的邮件发送失败'
         data = dict(code=errcode, msg=msg)
         return HttpResponse(json.dumps(data), content_type='application/json')
 
@@ -1007,7 +1048,8 @@ def PublishSheetDelete(request):
             if publish_obj.creator == user:
                 publish_obj.delete()
                 project_name = publish_obj.goservices.all()[0].group.name
-                res_log = 'Successfully delete Publish Sheet, id : {0}, gogroup: {1}'.format(publish_obj.id, project_name)
+                res_log = 'Successfully delete Publish Sheet, id : {0}, gogroup: {1}'.format(publish_obj.id,
+                                                                                             project_name)
                 asset_utils.logs(user.username, ip, 'delete Publish Sheet', res_log)
             else:
                 errcode = 500
@@ -1029,7 +1071,7 @@ def ApproveList(request):
     page_2 = request.GET.get('page_2', 1)
     page_3 = request.GET.get('page_3', 1)
     user = request.user
-    publishsheets = models.PublishSheet.objects.all().order_by('publish_date', 'publish_time')
+    publishsheets = models.PublishSheet.objects.filter(~Q(status='6')).order_by('publish_date', 'publish_time')
 
     tobe_approved_list = []
     approve_refused_list = []
@@ -1103,24 +1145,20 @@ def ApproveList(request):
                         tobe_approved_list.append(tmp_dict)
                     elif publish.status == '2':
                         approve_refused_list.append(tmp_dict)
-                    elif publish.status == '6':
-                        # 超时未审批
-                        pass
                     else:
                         if publish.status == '3':
                             try:
                                 history_obj = models.PublishApprovalHistory.objects.get(publish_sheet=publish)
                             except models.PublishApprovalHistory.DoesNotExist:
-                                print '1----history not exist'
                                 tobe_approved_list.append(tmp_dict)
                             else:
                                 if history_obj.approve_count == '1' and user.username in second_list:
+                                    # 既是一级审批人，又是二级审批人
                                     tobe_approved_list.append(tmp_dict)
                                 else:
                                     approve_passed_list.append(tmp_dict)
                         else:
                             approve_passed_list.append(tmp_dict)
-
                 elif user.username in second_list:
                     try:
                         history_obj = models.PublishApprovalHistory.objects.get(publish_sheet=publish)
@@ -1221,6 +1259,8 @@ def ApproveJudge(request):
     publish_id = int(request.POST['publish_id'])
     approve = request.POST['approve']
     text = request.POST['text']
+    if text:
+        text = text.strip()
     errcode = 0
     msg = 'ok'
 
@@ -1232,15 +1272,42 @@ def ApproveJudge(request):
         data = dict(code=errcode, msg=msg)
         return HttpResponse(json.dumps(data), content_type='application/json')
     else:
+        goservices_objs = publishsheet.goservices.all()
+        subject = u'cmdb发布系统'
+        ser_list = goservices_objs.order_by('name').values_list('name', flat=True)
+        services_str = ', '.join(ser_list)
+        env = goservices_objs[0].get_env_display()
+
+        sheet_dict = {
+            'services_str': services_str,
+            'gogroup': goservices_objs[0].group,
+            'creator': user.username,
+            'env': env,
+            'approval_level': publishsheet.approval_level.get_name_display(),
+            'id': publishsheet.id,
+            'publish_date': publishsheet.publish_date,
+            'publish_time': publishsheet.publish_time,
+            'reason': publishsheet.reason,
+        }
         try:
-            projectinfo_obj = models.ProjectInfo.objects.get(group=publishsheet.goservices.all()[0].group)
+            projectinfo_obj = models.ProjectInfo.objects.get(group=goservices_objs[0].group)
         except models.ProjectInfo.DoesNotExist:
             projectinfo_obj = None
+            first_approvers = None
+            second_approvers = None
+        else:
+            first_approvers = projectinfo_obj.first_approver.all()
+            second_approvers = projectinfo_obj.second_approver.all()
 
         try:
             publish_history = models.PublishApprovalHistory.objects.get(publish_sheet=publishsheet)
         except models.PublishApprovalHistory.DoesNotExist:
             # 从未审批过，现在是第一次审批
+            if user not in first_approvers:
+                errcode = 500
+                msg = u'你不是第一审批人，不能审批'
+                data = dict(code=errcode, msg=msg)
+                return HttpResponse(json.dumps(data), content_type='application/json')
             publish_history = models.PublishApprovalHistory()
             publish_history.publish_sheet = publishsheet
             publish_history.approve_count = '1'
@@ -1267,6 +1334,7 @@ def ApproveJudge(request):
                     to_list = [approver.email for approver in publishsheet.second_approver.all() if approver.email]
             else:
                 # 第一审批拒绝
+                sheet_dict.update({'refuse_reason': text})
                 publish_history.refuse_reason = text
                 publish_history.save()
                 publishsheet.status = '2'
@@ -1278,23 +1346,39 @@ def ApproveJudge(request):
                     to_list.extend([approver.email for approver in projectinfo_obj.mail_group.all() if approver.email])
 
             # 发邮件
-            url = CMDB_URL + 'asset/project/send/email/'
-            params = {
-                'sheet_id': publishsheet.id,
+            content = {
+                'title': subject,
+                'sheet': sheet_dict,
                 'head_content': u'发布单第一级审批结果：{0}'.format(publish_history.get_approve_status_display()),
-                'to': to_list,
-                'can_approve': can_approve
+                'can_approve': can_approve,
+                'cmdb_url': CMDB_URL,
             }
-            r = requests.get(url, params)
-            print 'ApproveJudge---if-----email done'
-            if r.status_code != 200:
-                errcode = 500
-                msg = u'邮件发送失败'
+            email_template_name = 'email/publish_sheet.html'
+            email_content = loader.render_to_string(email_template_name, content)
+            async_send_mail(subject, '', EMAIL_HOST_USER, to_list, fail_silently=False, html=email_content)
+            # url = CMDB_URL + 'asset/project/send/email/'
+            # params = {
+            #     'sheet_id': publishsheet.id,
+            #     'head_content': u'发布单第一级审批结果：{0}'.format(publish_history.get_approve_status_display()),
+            #     'to': to_list,
+            #     'can_approve': can_approve
+            # }
+            # r = requests.get(url, params)
+            # print 'ApproveJudge---if-----email done'
+            # if r.status_code != 200:
+            #     errcode = 500
+            #     msg = u'邮件发送失败'
 
-            res_log = 'Successfully approve Publish Sheet first time, approve result : {0}'.format(publish_history.get_approve_status_display())
+            res_log = 'Successfully approve Publish Sheet first time, approve result : {0}'.format(
+                publish_history.get_approve_status_display())
             asset_utils.logs(user.username, ip, 'approve Publish Sheet first time', res_log)
         else:
             # 被第一审批通过，现在已是第二次审批
+            if user not in second_approvers:
+                errcode = 500
+                msg = u'你不是第二审批人，不能审批'
+                data = dict(code=errcode, msg=msg)
+                return HttpResponse(json.dumps(data), content_type='application/json')
             publish_history.approve_count = '2'
             publish_history.approve_status = approve
             publish_history.second_approver = user
@@ -1304,6 +1388,7 @@ def ApproveJudge(request):
                 publishsheet.status = '3'
                 publishsheet.save()
             else:
+                sheet_dict.update({'refuse_reason': text})
                 publish_history.refuse_reason = text
                 publishsheet.status = '2'
                 publishsheet.save()
@@ -1316,18 +1401,29 @@ def ApproveJudge(request):
                 to_list.extend([approver.email for approver in projectinfo_obj.mail_group.all() if approver.email])
 
             # 发邮件
-            url = CMDB_URL + 'asset/project/send/email/'
-            params = {
-                'sheet_id': publishsheet.id,
+            content = {
+                'title': subject,
+                'sheet': sheet_dict,
                 'head_content': u'发布单第二级审批结果：{0}'.format(publish_history.get_approve_status_display()),
-                'to': to_list,
-                'can_approve': can_approve
+                'can_approve': can_approve,
+                'cmdb_url': CMDB_URL,
             }
-            r = requests.get(url, params)
-            print 'ApproveJudge---else-----email done'
-            if r.status_code != 200:
-                errcode = 500
-                msg = u'邮件发送失败'
+            email_template_name = 'email/publish_sheet.html'
+            email_content = loader.render_to_string(email_template_name, content)
+            async_send_mail(subject, '', EMAIL_HOST_USER, to_list, fail_silently=False, html=email_content)
+            #
+            # url = CMDB_URL + 'asset/project/send/email/'
+            # params = {
+            #     'sheet_id': publishsheet.id,
+            #     'head_content': u'发布单第二级审批结果：{0}'.format(publish_history.get_approve_status_display()),
+            #     'to': to_list,
+            #     'can_approve': can_approve
+            # }
+            # r = requests.get(url, params)
+            # print 'ApproveJudge---else-----email done'
+            # if r.status_code != 200:
+            #     errcode = 500
+            #     msg = u'邮件发送失败'
 
             res_log = 'Successfully approve Publish Sheet second time, approve result : {0}'.format(
                 publish_history.get_approve_status_display())
@@ -1510,6 +1606,7 @@ def StartPublish(request):
             asset_utils.logs(user.username, ip, 'deploy Publish Sheet', res_log)
 
         # 发邮件
+        subject = u'cmdb发布系统'
         to_list = [publishsheet.creator.email]
         if publishsheet.approval_level.name != '1':
             try:
@@ -1520,17 +1617,39 @@ def StartPublish(request):
                 if projectinfo_obj.mail_group.all():
                     to_list.extend([approver.email for approver in projectinfo_obj.mail_group.all() if approver.email])
 
-        url = CMDB_URL + 'asset/project/send/email/'
-        params = {
-            'sheet_id': publishsheet.id,
-            'head_content': u'发布单完成发布',
-            'to': to_list,
-            'can_approve': '3'
+        sheet_dict = {
+            'services_str': ', '.join(services),
+            'gogroup': goservices[0].group,
+            'creator': user.username,
+            'env': env,
+            'approval_level': publishsheet.approval_level.get_name_display(),
+            'id': publishsheet.id,
+            'publish_date': publishsheet.publish_date,
+            'publish_time': publishsheet.publish_time,
+            'reason': publishsheet.reason,
         }
-        r = requests.get(url, params)
-        if r.status_code != 200:
-            errcode = 500
-            msg = u'邮件发送失败'
+        content = {
+            'title': subject,
+            'sheet': sheet_dict,
+            'head_content': u'发布单完成发布',
+            'can_approve': '3',
+            'cmdb_url': CMDB_URL,
+        }
+        email_template_name = 'email/publish_sheet.html'
+        email_content = loader.render_to_string(email_template_name, content)
+        async_send_mail(subject, '', EMAIL_HOST_USER, to_list, fail_silently=False, html=email_content)
+
+        # url = CMDB_URL + 'asset/project/send/email/'
+        # params = {
+        #     'sheet_id': publishsheet.id,
+        #     'head_content': u'发布单完成发布',
+        #     'to': to_list,
+        #     'can_approve': '3'
+        # }
+        # r = requests.get(url, params)
+        # if r.status_code != 200:
+        #     errcode = 500
+        #     msg = u'邮件发送失败'
 
     data = dict(code=errcode, msg=msg, publish_result=result, publish_ok=publish_ok)
     return render(request, 'publish/publish_result.html', data)
@@ -1665,7 +1784,9 @@ def sendEmail(request):
             services_str = ', '.join(ser_list)
             gogroup_obj = services_objs[0].group
             env = services_objs[0].get_env_display()
-            sheet_dict.update({'services_str': services_str, 'gogroup': gogroup_obj.name, 'creator': sheet_obj.creator.username, 'env': env, 'approval_level': sheet_obj.approval_level.get_name_display()})
+            sheet_dict.update(
+                {'services_str': services_str, 'gogroup': gogroup_obj.name, 'creator': sheet_obj.creator.username,
+                 'env': env, 'approval_level': sheet_obj.approval_level.get_name_display()})
 
             subject = u'cmdb发布系统'
             content = {
@@ -1679,10 +1800,15 @@ def sendEmail(request):
             from_email = EMAIL_HOST_USER
             email_template_name = 'email/publish_sheet.html'
             email_content = loader.render_to_string(email_template_name, content)
+            # try:
+            #     send_mail(subject, "", from_email, to_list, html_message=email_content)
+            # except Exception as e:
+            #     print 'send_mail failed : ', e.message
+
             try:
-                send_mail(subject, "", from_email, to_list, html_message=email_content)
+                async_send_mail(subject, '', from_email, to_list, fail_silently=False, html=email_content)
             except Exception as e:
-                print 'send_mail failed : ', e.message
+                print 'async_send_mail failed : ', e.message
 
             data = dict(code=errcode, msg=msg, content=content)
             return HttpResponse(json.dumps(data), content_type='application/json')

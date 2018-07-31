@@ -91,6 +91,8 @@
                                             <li class="danger-element" data-toggle="modal"
                                                 data-target="#AprroveDetailModal"
                                                 onclick="approve_sheet_detail('{{ sheet.id }}', '2')">
+                                                <i class="fa fa-clock-o"></i> {{ sheet.publish_date }} {{ sheet.publish_time }}<br>
+                                                创建人：{{ sheet.creator }}<br>
                                                 项目：{{ sheet.gogroup }}<br>
                                                 环境：{{ sheet.env }}<br>
                                                 重启服务：{{ sheet.services_str }}<br>
@@ -138,6 +140,8 @@
                                             <li class="success-element" data-toggle="modal"
                                                 data-target="#AprroveDetailModal"
                                                 onclick="approve_sheet_detail('{{ sheet.id }}', '2')">
+                                                <i class="fa fa-clock-o"></i> {{ sheet.publish_date }} {{ sheet.publish_time }}<br>
+                                                创建人：{{ sheet.creator }}<br>
                                                 项目：{{ sheet.gogroup }}<br>
                                                 环境：{{ sheet.env }}<br>
                                                 重启服务：{{ sheet.services_str }}<br>

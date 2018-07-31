@@ -61,6 +61,14 @@
                                                 <td class="alignright">
                                                     {% if sheet.reason %}{{ sheet.reason }}{% else %}无{% endif %}</td>
                                             </tr>
+                                            {% if refuse_reason %}
+                                                <tr>
+                                                    <td>拒绝理由</td>
+                                                    <td class="alignright">
+                                                        {{ refuse_reason }}
+                                                    </td>
+                                                </tr>
+                                            {% endif %}
                                         </table>
                                     </td>
                                 </tr>
