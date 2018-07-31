@@ -34,8 +34,14 @@ class FestivalAdmin(admin.ModelAdmin):
     search_fields = ['name', 'start_day', 'end_day']
 
 
+class ApproverAdmin(admin.ModelAdmin):
+    list_display = ('role', 'approver')
+    search_fields = ['role', 'approver']
+
+
 admin.site.register(MailGroup, MailGroupAdmin)
 admin.site.register(ProjectInfo, ProjectInfoAdmin)
 admin.site.register(ApprovalLevel, ApprovalLevelAdmin)
 admin.site.register(TimeSlotLevel, TimeSlotLevelAdmin)
 admin.site.register(Festival, FestivalAdmin)
+admin.site.register(Approver, ApproverAdmin)

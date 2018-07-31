@@ -1,5 +1,5 @@
 # coding:utf8
-import json, os, sys
+import json, os, sys, time
 import re
 import threading
 reload(sys)
@@ -12,7 +12,6 @@ from functools import partial
 from django.core.serializers import serialize
 from django.core.mail import EmailMultiAlternatives, get_connection
 from mico.settings import EMAIL_HOST, EMAIL_PORT, EMAIL_HOST_USER, EMAIL_HOST_PASSWORD,  EMAIL_USER
-
 
 
 serialize = partial(serialize, 'json')
@@ -69,4 +68,3 @@ class EmailThread(threading.Thread):
 
 def send_mail_thread(subject, body, from_email, recipient_list, fail_silently=False, *args, **kwargs):
     EmailThread(subject, body, from_email, recipient_list, fail_silently).start()
-

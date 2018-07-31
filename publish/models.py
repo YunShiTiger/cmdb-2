@@ -10,6 +10,18 @@ IF_OR_NOT = (
 )
 
 
+class Approver(models.Model):
+    role = models.CharField(max_length=50, verbose_name=u'角色', null=True, blank=True)
+    approver = models.ForeignKey(User, verbose_name=u'审批人', related_name='approver')
+
+    def __unicode__(self):
+        return self.approver.username
+
+    class Meta:
+        verbose_name = u"审批人"
+        verbose_name_plural = verbose_name
+
+
 class Festival(models.Model):
     name = models.CharField(max_length=32, verbose_name=u"节日名称")
     start_day = models.DateField('日期')

@@ -26,6 +26,7 @@ def initProject(request):
     gogroup_objs = asset_models.gogroup.objects.all()
     mailgroup_objs = models.MailGroup.objects.all()
     user_objs = User.objects.all()
+    approver_objs = models.Approver.objects.all()
 
     project_list = []
     projectinfo_objs = models.ProjectInfo.objects.all().order_by('group__name')
@@ -33,10 +34,10 @@ def initProject(request):
         tmp_dict = {
             'project_id': projectinfo.id,
             'project_name': projectinfo.group.name,
-            'owner_list': [owner.username for owner in projectinfo.owner.all()],
-            'mailgroup_list': [owner.email for owner in projectinfo.mail_group.all()],
-            'first_list': [owner.username for owner in projectinfo.first_approver.all()],
-            'second_list': [owner.username for owner in projectinfo.second_approver.all()],
+            'owner_list': projectinfo.owner.all().values_list('username', flat=True),
+            'mailgroup_list': projectinfo.mail_group.all().values_list('email', flat=True),
+            'first_list': projectinfo.first_approver.all().values_list('username', flat=True),
+            'second_list': projectinfo.second_approver.all().values_list('username', flat=True),
             'creator': projectinfo.creator.username,
         }
         project_list.append(tmp_dict)
@@ -51,7 +52,7 @@ def initProject(request):
         final_projectinfo_list = paginator.page(paginator.num_pages)
 
     return render(request, 'publish/gogroup_init.html',
-                  {'gogroup_objs': gogroup_objs, 'mailgroup_objs': mailgroup_objs, 'user_objs': user_objs,
+                  {'gogroup_objs': gogroup_objs, 'mailgroup_objs': mailgroup_objs, 'user_objs': user_objs, 'approver_objs': approver_objs,
                    'project_list': final_projectinfo_list})
 
 
@@ -155,7 +156,7 @@ def projectDelete(request):
 @login_required
 def LevelList(request):
     page = request.GET.get('page', 1)
-    print 'level list page : ', page
+
     project_objs = models.ProjectInfo.objects.all().order_by('group__name')
 
     timeslot_objs = models.TimeSlotLevel.objects.filter().order_by('-is_global', 'approval_level__name',
@@ -206,15 +207,15 @@ def LevelDetail(request):
                 first_list = []
                 second_list = []
             elif approval_level == '2':
-                first_list = [owner.username for owner in projectinfo.first_approver.all()]
+                first_list = projectinfo.first_approver.all().values_list('username', flat=True)
                 second_list = []
             else:
-                first_list = [owner.username for owner in projectinfo.first_approver.all()]
-                second_list = [owner.username for owner in projectinfo.second_approver.all()]
+                first_list = projectinfo.first_approver.all().values_list('username', flat=True)
+                second_list = projectinfo.second_approver.all().values_list('username', flat=True)
             tmp_dict = {
                 'project_name': projectinfo.group.name,
-                'owner_list': [owner.username for owner in projectinfo.owner.all()],
-                'mailgroup_list': [owner.email for owner in projectinfo.mail_group.all()],
+                'owner_list': projectinfo.owner.all().values_list('username', flat=True),
+                'mailgroup_list': projectinfo.mail_group.all().values_list('email', flat=True),
                 'first_list': first_list,
                 'second_list': second_list,
             }
@@ -467,24 +468,26 @@ def PublishSheetList(request):
     approve_passed_list = []
     for publish in publishsheets:
         services_objs = publish.goservices.all()
+        services_1 = services_objs[0]
         ser_list = services_objs.order_by('name').values_list('name', flat=True)
         services_str = ', '.join(ser_list)
-        env = services_objs[0].get_env_display()
-        gogroup_obj = services_objs[0].group
+        env = services_1.get_env_display()
+        gogroup_obj = services_1.group
         level = publish.approval_level.get_name_display()
         approve_level = publish.approval_level.name
         if approve_level == '1':
             first_str = ''
             second_str = ''
         elif approve_level == '2':
-            first_list = [owner.username for owner in publish.first_approver.all()]
+            first_list = publish.first_approver.all().values_list('username', flat=True)
             first_str = ', '.join(first_list)
             second_str = ''
         else:
-            first_list = [owner.username for owner in publish.first_approver.all()]
+            first_list = publish.first_approver.all().values_list('username', flat=True)
             first_str = ', '.join(first_list)
-            second_list = [owner.username for owner in publish.second_approver.all()]
+            second_list = publish.second_approver.all().values_list('username', flat=True)
             second_str = ', '.join(second_list)
+
         tmp_dict = serialize_instance(publish)
 
         if len(publish.sql_before) > 40:
@@ -499,6 +502,7 @@ def PublishSheetList(request):
                          'second_str': second_str, 'creator': publish.creator.username})
 
         tmp_dict['can_publish'] = False
+
         # 判断是否超时
         publish_datetime_str = publish.publish_date + ' ' + publish.publish_time
         publish_datetime_format = time.strptime(publish_datetime_str, '%Y-%m-%d %H:%M')
@@ -632,7 +636,6 @@ def PublishSheetList(request):
         approve_passed_list = paginator3.page(1)
     except EmptyPage:
         approve_passed_list = paginator3.page(paginator3.num_pages)
-
     data = dict(code=errcode, msg=msg, tobe_approved_list=tobe_approved_list, approve_refused_list=approve_refused_list,
                 approve_passed_list=approve_passed_list)
 
@@ -654,8 +657,9 @@ def PublishSheetDoneList(request):
     for publish in publishsheets:
         services_objs = publish.goservices.all().order_by('name')
         services_str = ', '.join(services_objs.values_list('name', flat=True))
-        env = services_objs[0].get_env_display()
-        gogroup_obj = services_objs[0].group
+        services_1 = services_objs[0]
+        env = services_1.get_env_display()
+        gogroup_obj = services_1.group
         level = publish.approval_level.get_name_display()
         approve_level = publish.approval_level.name
 
@@ -663,13 +667,13 @@ def PublishSheetDoneList(request):
             first_str = ''
             second_str = ''
         elif approve_level == '2':
-            first_list = [owner.username for owner in publish.first_approver.all()]
+            first_list = publish.first_approver.all().values_list('username', flat=True)
             first_str = ', '.join(first_list)
             second_str = ''
         else:
-            first_list = [owner.username for owner in publish.first_approver.all()]
+            first_list = publish.first_approver.all().values_list('username', flat=True)
             first_str = ', '.join(first_list)
-            second_list = [owner.username for owner in publish.second_approver.all()]
+            second_list = publish.second_approver.all().values_list('username', flat=True)
             second_str = ', '.join(second_list)
 
         tmp_dict = serialize_instance(publish)
@@ -1090,8 +1094,9 @@ def ApproveList(request):
             approve_level = publish.approval_level.name
             services_objs = publish.goservices.all().order_by('name')
             services_str = ', '.join(services_objs.values_list('name', flat=True))
-            env = services_objs[0].get_env_display()
-            gogroup_obj = services_objs[0].group
+            services_1 = services_objs[0]
+            env = services_1.get_env_display()
+            gogroup_obj = services_1.group
             level = publish.approval_level.get_name_display()
 
             tmp_dict = serialize_instance(publish)
@@ -1108,7 +1113,7 @@ def ApproveList(request):
                 pass
             elif approve_level == '2':
                 # 一级审批的单子
-                first_list = [owner.username for owner in publish.first_approver.all()]
+                first_list = publish.first_approver.all().values_list('username', flat=True)
                 first_str = ', '.join(first_list)
                 second_str = ''
 
@@ -1130,9 +1135,9 @@ def ApproveList(request):
 
             else:
                 # 二级审批的单子
-                first_list = [owner.username for owner in publish.first_approver.all()]
+                first_list = publish.first_approver.all().values_list('username', flat=True)
                 first_str = ', '.join(first_list)
-                second_list = [owner.username for owner in publish.second_approver.all()]
+                second_list = publish.second_approver.all().values_list('username', flat=True)
                 second_str = ', '.join(second_list)
 
                 tmp_dict.update(
@@ -1276,11 +1281,12 @@ def ApproveJudge(request):
         subject = u'cmdb发布系统'
         ser_list = goservices_objs.order_by('name').values_list('name', flat=True)
         services_str = ', '.join(ser_list)
-        env = goservices_objs[0].get_env_display()
+        services_1 = goservices_objs[0]
+        env = services_1.get_env_display()
 
         sheet_dict = {
             'services_str': services_str,
-            'gogroup': goservices_objs[0].group,
+            'gogroup': services_1.group,
             'creator': user.username,
             'env': env,
             'approval_level': publishsheet.approval_level.get_name_display(),
@@ -1453,8 +1459,9 @@ def PublishSheetDetail(request):
     else:
         services_objs = sheet_obj.goservices.all().order_by('name')
         services_str = ', '.join(services_objs.values_list('name', flat=True))
-        env = services_objs[0].get_env_display()
-        gogroup_obj = services_objs[0].group
+        services_1 = services_objs[0]
+        env = services_1.get_env_display()
+        gogroup_obj = services_1.group
         level = sheet_obj.approval_level.get_name_display()
         approve_level = sheet_obj.approval_level.name
         qa_objs = sheet_obj.qa.all().order_by('username')
@@ -1518,7 +1525,7 @@ def PublishSheetDetail(request):
                         content['refuse_reason'] = sheet_history_obj.refuse_reason
                     else:
                         # 二级审批时被拒绝
-                        content['first_approver'] = sheet_history_obj.second_approver.username
+                        content['first_approver'] = sheet_history_obj.first_approver.username
                         content['first_approve_time'] = sheet_history_obj.first_approve_time
                         content['second_approver'] = sheet_history_obj.second_approver.username
                         content['second_approve_time'] = sheet_history_obj.second_approve_time
@@ -1695,8 +1702,9 @@ def ApproveSheetDetail(request):
     else:
         services_objs = sheet_obj.goservices.all().order_by('name')
         services_str = ', '.join(services_objs.values_list('name', flat=True))
-        env = services_objs[0].get_env_display()
-        gogroup_obj = services_objs[0].group
+        services_1 = services_objs[0]
+        env =services_1.get_env_display()
+        gogroup_obj = services_1.group
         level = sheet_obj.approval_level.get_name_display()
         approve_level = sheet_obj.approval_level.name
         qa_objs = sheet_obj.qa.all().order_by('username')
@@ -1749,7 +1757,7 @@ def ApproveSheetDetail(request):
                         content['refuse_reason'] = sheet_history_obj.refuse_reason
                     else:
                         # 二级审批时被拒绝
-                        content['first_approver'] = sheet_history_obj.second_approver.username
+                        content['first_approver'] = sheet_history_obj.first_approver.username
                         content['first_approve_time'] = sheet_history_obj.first_approve_time
                         content['second_approver'] = sheet_history_obj.second_approver.username
                         content['second_approve_time'] = sheet_history_obj.second_approve_time
@@ -1782,8 +1790,9 @@ def sendEmail(request):
             services_objs = sheet_obj.goservices.all()
             ser_list = services_objs.order_by('name').values_list('name', flat=True)
             services_str = ', '.join(ser_list)
-            gogroup_obj = services_objs[0].group
-            env = services_objs[0].get_env_display()
+            services_1 = services_objs[0]
+            gogroup_obj = services_1.group
+            env = services_1.get_env_display()
             sheet_dict.update(
                 {'services_str': services_str, 'gogroup': gogroup_obj.name, 'creator': sheet_obj.creator.username,
                  'env': env, 'approval_level': sheet_obj.approval_level.get_name_display()})

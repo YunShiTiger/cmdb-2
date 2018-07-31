@@ -72,8 +72,8 @@
                                             <label>&nbsp;一级审批人</label>
                                             <select id="first_select" multiple="multiple"
                                                     class="form-control" data-live-search="true">
-                                                {% for gogroup in user_objs %}
-                                                    <option value={{ gogroup.id }}>{{ gogroup.username }}</option>
+                                                {% for user in approver_objs %}
+                                                    <option value={{ user.id }}>{{ user.approver.username }}</option>
                                                 {% endfor %}
                                             </select>
                                         </div>
@@ -81,8 +81,8 @@
                                             <label>&nbsp;二级审批人</label>
                                             <select id="second_select" multiple="multiple"
                                                     class="form-control" data-live-search="true">
-                                                {% for gogroup in user_objs %}
-                                                    <option value={{ gogroup.id }}>{{ gogroup.username }}</option>
+                                                {% for user in approver_objs %}
+                                                    <option value={{ user.id }}>{{ user.approver.username }}</option>
                                                 {% endfor %}
                                             </select>
                                         </div>
