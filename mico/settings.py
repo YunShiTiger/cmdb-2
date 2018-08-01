@@ -255,22 +255,21 @@ ZABBIX_INFO = [
 GRAFANA_URL = 'https://<user>:<pass>@grafana.localhost'
 SENTRY_URL = 'https://sentry.localhost'
 
-EMAIL_HOST = 'smtp.163.com'
-EMAIL_PORT = '25'
-EMAIL_HOST_USER = 'junkili@163.com'
-EMAIL_HOST_PASSWORD = 'EzbuyBest1'
-EMAIL_USER = 'junkili'
-EMAIL_USE_TLS = True
-DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
-
-CMDB_URL = 'http://192.168.199.61:8012/'
-
-# EMAIL_HOST = 'smtp.exmail.qq.com'
-# EMAIL_PORT = 465
-# EMAIL_HOST_USER = 'ezbuy_cmdb@ezbuy.com'
-# EMAIL_HOST_PASSWORD = '3c964DA3a'
-# EMAIL_USER = 'ezbuy_cmdb@ezbuy.com'
+# EMAIL_HOST = 'smtp.163.com'
+# EMAIL_PORT = '25'
+# EMAIL_HOST_USER = 'junkili@163.com'
+# EMAIL_HOST_PASSWORD = 'EzbuyBest1'
+# EMAIL_USER = 'junkili'
 # EMAIL_USE_TLS = True
-# DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
-#
+
 # CMDB_URL = 'http://127.0.0.1:8010/'
+
+EMAIL_HOST = 'smtp.exmail.qq.com'
+EMAIL_PORT = '465'
+EMAIL_HOST_USER = 'ezbuy_cmdb@ezbuy.com'
+EMAIL_HOST_PASSWORD = '3c964DA3a'
+# EMAIL_USER = 'ezbuy_cmdb@ezbuy.com'
+EMAIL_USE_SSL = True
+DEFAULT_FROM_EMAIL = 'ezbuy_cmdb@ezbuy.com'
+#
+CMDB_URL = 'http://192.168.199.61:8012/'
