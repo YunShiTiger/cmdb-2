@@ -63,6 +63,7 @@ if __name__ == "__main__":
                 }
                 email_template_name = 'email/publish_sheet.html'
                 email_content = loader.render_to_string(email_template_name, content)
+                print 'start send mail in crontab'
                 async_send_mail(subject, '', EMAIL_HOST_USER, to_list, fail_silently=False, html=email_content)
                 # url = CMDB_URL + 'asset/project/send/email/'
                 # params = {

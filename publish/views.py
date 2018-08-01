@@ -16,7 +16,7 @@ from publish import models
 from publish.utils import serialize_instance, cut_str, send_mail_thread
 from asset import models as asset_models
 from asset import utils as asset_utils
-from mico.settings import EMAIL_HOST, EMAIL_PORT, EMAIL_HOST_USER, EMAIL_HOST_PASSWORD, EMAIL_USER, CMDB_URL
+from mico.settings import EMAIL_HOST, EMAIL_PORT, EMAIL_HOST_USER, EMAIL_HOST_PASSWORD, CMDB_URL
 from asynchronous_send_mail import send_mail as async_send_mail
 
 
