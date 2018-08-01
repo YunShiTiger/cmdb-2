@@ -100,7 +100,7 @@ SESSION_SAVE_EVERY_REQUEST = True
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'cmdb',
+        'NAME': 'cmdb_test',
         'USER': 'root',
         'PASSWORD': '123456',
         'HOST': '127.0.0.1',
