@@ -1,27 +1,133 @@
 {% extends 'base.html' %}
 {% include 'link_css.html' %}
+{% block self_head_css_js %}
+    <link href="/static/alert/chosen.min.css" rel="stylesheet">
+{% endblock %}
+{% block self_footer_js %}
+    <script src="/static/alert/chosen.jquery.min.js"></script>
+{% endblock %}
 {% block content %}
 
- <div class="radio">
-    <form  action="{% url 'getData' %}" method="get" xmlns="http://www.w3.org/1999/html">
-        <!--input type="text" name="username"-->
 
-        <label class="radio-inline">
-            <input type="radio" name="username" value="spike">spike
-        </label>
-        <label class="radio-inline">
-            <input type="radio" name="username" value="bulma">bulma
-        </label>
-        <label class="radio-inline">
-            <input type="radio" name="username" value="ezdelivery">ezdelivery
-         </label>
-         <label class="radio-inline">
-            <input type="checkbox" name="username" value="ezdelivery">ezdelivery
-         </label>
-        <br/>
-        <input type="submit" value="确定">
-    </form>
- </div>
+<div class="text-center">
+<form  class="col-lg-12" action="{% url 'getData' %}" method="post" onsubmit="return display_prompt()">
+  <div class="input-group my-group text-center" style="margin: 0px 0px 100px;">
+    <span class="input-group-btn">
+      <button class="btn btn-default active" type="button">项目名称</button>
+    </span>
+    <select id="project" class="selectpicker form-control" data-live-search="true" name="goProject" onchange="getoption(this.value)">
+        {% for name in groupname %}
+            <option>{{ name.name }}</option>
+        {% endfor %}
+    </select>
+  </div>
+
+  <div class="input-group my-group text-center" style="margin: 0px 0px 100px 0px;">
+    <span class="input-group-btn">
+      <button class="btn btn-default active" type="button">运行环境</button>
+    </span>
+    <select id="env" class="selectpicker form-control" data-live-search="true" name="env"  onchange="getoption(this.value)">
+      <option value="none"></option>
+      <option value="1">生产环境</option>
+      <option value="2">测试环境</option>
+    </select>
+  </div>
+
+  <div class="input-group my-group text-center">
+    <span class="input-group-btn">
+      <button class="btn btn-default active" type="button">重启服务</button>
+    </span>
+    <select id="services" multiple class="selectpicker form-control" data-live-search="true" name="services"></select>
+    <input id="url" name="url" type="hidden">
+    <input id="sql" name="sql" type="hidden">
+    <input id="consul" name="consul" type="hidden">
+  </div>
+
+<br/>
+    <input id='sub' class="btn btn-danger" type="submit" value="Deploy" disabled="disabled">
+</form>
+
+</div>
+<script>
+$(document).ready(function () {
+    $("#services").chosen({width: "100%", max_selected_options: 5, search_contains: true, allow_single_deselect: true});
+});
+
+    function getoption(val) {
+
+        var project = document.getElementById("project").value;
+        var env = document.getElementById("env").value;
+        var select = document.getElementById("services");
+
+
+        select.options.length = 0;   // del options
+        $('#services').trigger('chosen:updated');
+        if (env != "none") {
+            $.getJSON("/asset/getProjectList",{"project":project,"env":env},function (result) {
+                //console.log(result)
+                for (i=0;i<result.length;i++) {
+                    var objOption = document.createElement("OPTION")
+                    objOption.value = result[i]
+                    objOption.text = result[i]
+                    select.add(objOption)
+                }
+                if (result.length != 0) {
+                    $("#sub").attr("disabled", false)
+                }
+                else{
+                    $("#sub").attr("disabled", true)
+                }
+                console.log(result.length)
+                $('#services').trigger('chosen:updated');
+            })
+        }
+        else{
+            $("#sub").attr("disabled", true)
+        }
+    }
+
+    function display_prompt() {
+        if (!$('#services').val()) {
+            alert('goservice is missing ...');
+            return false;
+        }
+        var url = document.getElementById("url");
+        var url_address = prompt("请输入发布的TAPD URL: ","")
+
+        if (url_address == null)
+        {
+            console.log(url_address)
+            return false
+        }
+        else if (url_address.match("tower.im") || url_address.match("tapd.cn"))
+        {
+            url.value = url_address
+            var sql = document.getElementById("sql");
+            var is_sql = prompt("是否有SQL要执行，如果有请让DBA执行后再发布: ","")
+            if (is_sql == "")
+            {
+                alert('不能为空')
+                return false
+            }
+            else{
+                var consul = document.getElementById("consul");
+                var is_consul = prompt("是否有consul key添加或修改，如果有请让运维修改或添加后再发布: ","")
+                if (is_consul == "")
+                {
+                    alert('不能为空')
+                    return false
+                }
+            }
+            console.log(is_sql)
+            return true
+        }
+        else
+        {
+            alert('URL填写错误')
+            return false
+        }
+
+    }
+</script>
 
 {% endblock %}
-</html>

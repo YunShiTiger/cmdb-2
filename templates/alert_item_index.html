@@ -1,0 +1,647 @@
+{% extends 'base.html' %}
+{% block self_head_css_js %}
+    <link href="/static/alert/chosen.min.css" rel="stylesheet">
+    <link href="/static/alert/select2.min.css" rel="stylesheet">
+<style type="text/css">
+.text-center {
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.spinner {
+  margin: 100px auto;
+  width: 50px;
+  height: 60px;
+  text-align: center;
+  font-size: 10px;
+}
+.spinner > div {
+  background-color: #67CF22;
+  height: 100%;
+  width: 6px;
+  display: inline-block;
+  -webkit-animation: stretchdelay 1.2s infinite ease-in-out;
+  animation: stretchdelay 1.2s infinite ease-in-out;
+}
+.spinner .rect2 {
+  -webkit-animation-delay: -1.1s;
+  animation-delay: -1.1s;
+}
+.spinner .rect3 {
+  -webkit-animation-delay: -1.0s;
+  animation-delay: -1.0s;
+}
+.spinner .rect4 {
+  -webkit-animation-delay: -0.9s;
+  animation-delay: -0.9s;
+}
+.spinner .rect5 {
+  -webkit-animation-delay: -0.8s;
+  animation-delay: -0.8s;
+}
+@-webkit-keyframes stretchdelay {
+  0%, 40%, 100% { -webkit-transform: scaleY(0.4) }
+  20% { -webkit-transform: scaleY(1.0) }
+}
+@keyframes stretchdelay {
+  0%, 40%, 100% {
+    transform: scaleY(0.4);
+    -webkit-transform: scaleY(0.4);
+  }  20% {
+    transform: scaleY(1.0);
+    -webkit-transform: scaleY(1.0);
+  }
+}
+</style>
+{% endblock %}
+{% block content %}
+
+<div class="wrapper wrapper-content animated fadeIn">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="ibox float-e-margins" id="all">
+                <div class="ibox-title">
+                    <h5> 告警项列表</h5>
+                    <div class="ibox-tools">
+                        <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+                            <i title="新增监控" class="fa fa-plus" onclick="addModal();return false;">新增监控</i>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="ibox-content">
+                    <form id="asset_form">
+
+                        <table class="table table-striped table-bordered table-hover " id="editable">
+                            <thead>
+                                <tr>
+                                    <th class="text-center"> 监控项ID </th>
+                                    <th class="text-center"> 名称 </th>
+                                    <th class="text-center"> 数据来源 </th>
+                                    <th class="text-center"> KEY值 </th>
+                                    <th class="text-center"> 状态 </th>
+                                    <th class="text-center"> 触发条件 </th>
+                                    <th class="text-center"> 触发间隔 </th>
+                                    <th class="text-center"> 触发函数 </th>
+                                    <th class="text-center"> 静默时间 </th>
+                                    <th class="text-center"> </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            {% for info in items %}
+                                <tr class="gradeX">
+                                    <td class="text-center">{{ info.id }}</td>
+                                    <td class="text-center"><span title="{{ info.name }}">{% if info.name|length > 35 %}{{ info.name|truncatechars:35 }}{% else %}{{ info.name }}{% endif %}</span></td>
+                                    <td class="text-center">{{ info.ref }}</td>
+                                    <td class="text-center"><span title="{{ info.key }}">{% if info.key|length > 35 %}{{ info.key|truncatechars:35 }}{% else %}{{ info.key }}{% endif %}</span></td>
+                                    {% if info.state == 0 %}
+                                        <td class="text-center">启用告警</td>
+                                    {% else %}
+                                        <td class="text-center">禁用告警</td>
+                                    {% endif %}
+                                    {% if info.state_ratio == 0 %}
+                                        <td class="text-center">日环比 超过{{ info.expr }}%</td>
+                                    {% else %}
+                                        <td class="text-center">{{ info.expr }}</td>
+                                    {% endif %}
+                                    <td class="text-center">{{ info.interval }}秒</td>
+                                    <td class="text-center">
+                                        {% if info.func == 'avg' %}
+                                            平均值
+                                        {% elif info.func == 'max' %}
+                                            最大值
+                                        {% elif info.func == 'min' %}
+                                            最小值
+                                        {% elif info.func == 'sum' %}
+                                            总和
+                                        {% else %}
+                                            实时值
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-center">
+                                        {% if info.silent_from == -1 or info.silent_to == -1 or info.silent_from == info.silent_to %}
+                                            无
+                                        {% else %}
+                                            {{ info.silent_from }}:00 ~ {% if info.silent_from > info.silent_to %}次日{% endif %}{{ info.silent_to }}:00
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-center">
+                                        <button onclick="histModal('{{ info.id }}', '{{ info.name }}');return false;">历史数据</button>
+                                        <button onclick="editModal('{{ info.id }}', '{{ info.name }}', '{{ info.ref }}', '{{ info.key }}', '{{ info.state }}', '{{ info.expr }}', '{{ info.interval }}', '{{ info.func }}', '{{ info.silent_from }}', '{{ info.silent_to }}');return false;">编辑</button>
+                                        {% if request.user.is_superuser %}
+                                            <button onclick="removeProject('{{ info.id }}', '{{ info.name }}');return false;">删除</button>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+    <div id="modal-form" class="modal fade">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" onclick="$('#modal-form').modal('hide');">&times;</button>
+                    <h4 class="blue bigger">请填写告警信息:</h4>
+                </div>
+                <form class="form-horizontal">
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-xs-12 col-sm-9">
+                                <div class="form-group">
+                                    <label class="control-label col-xs-12 col-sm-3 no-padding-right" for="modal-form-name">名称：</label>
+                                    <div class="col-xs-12 col-sm-9">
+                                        <div class="clearfix">
+                                            <input required type="text" id="modal-form-name" name="name" style="width:100%">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="space-2"></div>
+
+                                <div class="form-group">
+                                    <label class="control-label col-xs-12 col-sm-3 no-padding-right" for="modal-form-ref">数据来源：</label>
+                                    <div class="col-xs-12 col-sm-9">
+                                        <div class="clearfix">
+                                            <select class="chosen-select form-control" name="ref" id="modal-form-ref">
+                                                <option value="graphite" selected>Graphite</option>
+                                                {#<option value="prometheus">Prometheus</option>#}
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="space-2"></div>
+
+                                <div class="form-group">
+                                    <label class="control-label col-xs-12 col-sm-3 no-padding-right" for="modal-form-key">KEY值：</label>
+                                    <div class="col-xs-12 col-sm-9">
+                                        <div class="clearfix">
+                                            <input style="width:100%" required type="text" id="modal-form-key" name="key">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="space-2"></div>
+
+                                <div class="form-group">
+                                    <label class="control-label col-xs-12 col-sm-3 no-padding-right">触发条件：</label>
+                                    <div class="col-xs-12 col-sm-9">
+                                        <span>
+                                            <select required id="modal-form-expr-logic" name="expr-logic" onchange="selectRatio(this.value);">
+                                                <option></option>
+                                                <option value=">>>">日环比 超过</option>
+                                                <option value=">">大于</option>
+                                                <option value=">=">大于等于</option>
+                                                <option value="<">小于</option>
+                                                <option value="<=">小于等于</option>
+                                                <option value="==">等于</option>
+                                                <option value="!=">不等于</option>
+                                            </select>
+                                        </span>
+                                        <span>
+                                            <input required digits="true" type="text" id="modal-form-expr-threshold" name="expr-threshold">
+                                            <span id="modal-form-ratio-mark" style="display: none">%</span>
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="space-2"></div>
+
+                                <div class="form-group">
+                                    <label class="control-label col-xs-12 col-sm-3 no-padding-right" for="modal-form-interval">触发间隔：</label>
+                                    <div class="col-xs-12 col-sm-9">
+                                        <div class="clearfix">
+                                            <input required digits="true" type="text" id="modal-form-interval" name="interval" value="60"> 秒
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="space-2"></div>
+
+                                <div class="form-group">
+                                    <label class="control-label col-xs-12 col-sm-3 no-padding-right" for="modal-form-func">触发函数：</label>
+                                    <div class="col-xs-12 col-sm-9">
+                                        <div class="clearfix">
+                                            <select required class="chosen-select form-control" name="func" id="modal-form-func">
+                                                <option value="avg" selected>平均值</option>
+                                                <option value="last">实时值</option>
+                                                <option value="max">最大值</option>
+                                                <option value="min">最小值</option>
+                                                <option value="sum">总和</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="space-2"></div>
+
+                                <div class="form-group">
+                                    <label class="control-label col-xs-12 col-sm-3 no-padding-right" for="modal-form-silent_from">静默时间：</label>
+                                    <div class="col-xs-12 col-sm-9">
+                                        <span>
+                                            <select name="silent_from" id="modal-form-silent_from">
+                                                <option value="-1"></option>
+                                                {% for _ in 'x'|ljust:'24' %}
+                                                    <option value="{{ forloop.counter0 }}">{{ forloop.counter0 }}:00</option>
+                                                {% endfor %}
+                                            </select>
+                                        </span>
+                                        <span> ~ </span>
+                                        <span>
+                                            <select name="silent_to" id="modal-form-silent_to">
+                                                <option value="-1"></option>
+                                                {% for _ in 'x'|ljust:'24' %}
+                                                    <option value="{{ forloop.counter0 }}">{{ forloop.counter0 }}:00</option>
+                                                {% endfor %}
+                                            </select>
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="space-2"></div>
+
+                                <div class="form-group">
+                                    <label class="control-label col-xs-12 col-sm-3 no-padding-right" for="modal-form-state">状态：</label>
+                                    <div class="col-xs-12 col-sm-9">
+                                        <div class="clearfix">
+                                            <select class="chosen-select form-control" name="state" id="modal-form-state">
+                                                <option value="0" selected>启用告警</option>
+                                                <option value="1">禁用告警</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="space-2"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-sm btn-primary">
+                            <i class="ace-icon fa fa-check"></i>
+                            提交
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div id="modal-form-edit" class="modal fade">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" onclick="$('#modal-form-edit').modal('hide');">&times;</button>
+                    <h4 class="blue bigger">请编辑告警信息:</h4>
+                </div>
+                <form class="form-horizontal">
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-xs-12 col-sm-9">
+                                <input style="display:none;" required type="text" title="item-id" id="modal-form-edit-id" name="id" class="col-xs-12 col-sm-10">
+                                <div class="form-group">
+                                    <label class="control-label col-xs-12 col-sm-3 no-padding-right" for="modal-form-edit-name">名称：</label>
+                                    <div class="col-xs-12 col-sm-9">
+                                        <div class="clearfix">
+                                            <input required type="text" id="modal-form-edit-name" name="name" style="width:100%">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="space-2"></div>
+
+                                <div class="form-group">
+                                    <label class="control-label col-xs-12 col-sm-3 no-padding-right" for="modal-form-edit-ref">数据来源：</label>
+                                    <div class="col-xs-12 col-sm-9">
+                                        <div class="clearfix">
+                                            <select class="chosen-select form-control" name="ref" id="modal-form-edit-ref">
+                                                <option value="graphite" selected>Graphite</option>
+{#                                                <option value="prometheus">Prometheus</option>#}
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="space-2"></div>
+
+                                <div class="form-group">
+                                    <label class="control-label col-xs-12 col-sm-3 no-padding-right" for="modal-form-edit-key">KEY值：</label>
+                                    <div class="col-xs-12 col-sm-9">
+                                        <div class="clearfix">
+                                            <input style="width:100%" required type="text" id="modal-form-edit-key" name="key">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="space-2"></div>
+
+                                <div class="form-group">
+                                    <label class="control-label col-xs-12 col-sm-3 no-padding-right">触发条件：</label>
+                                    <div class="col-xs-12 col-sm-9">
+                                        <span>
+                                            <select required id="modal-form-edit-expr-logic" name="expr-logic" onchange="selectRatioEdit(this.value);">
+                                                <option></option>
+                                                <option value=">>>">日环比 超过</option>
+                                                <option value=">">大于</option>
+                                                <option value=">=">大于等于</option>
+                                                <option value="<">小于</option>
+                                                <option value="<=">小于等于</option>
+                                                <option value="==">等于</option>
+                                                <option value="!=">不等于</option>
+                                            </select>
+                                        </span>
+                                        <span>
+                                            <input required digits="true" type="text" id="modal-form-edit-expr-threshold" name="expr-threshold">
+                                            <span id="modal-form-edit-ratio-mark" style="display: none">%</span>
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="space-2"></div>
+
+                                <div class="form-group">
+                                    <label class="control-label col-xs-12 col-sm-3 no-padding-right" for="modal-form-edit-interval">触发间隔：</label>
+                                    <div class="col-xs-12 col-sm-9">
+                                        <div class="clearfix">
+                                            <input required digits="true" type="text" id="modal-form-edit-interval" name="interval" value="60"> 秒
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="space-2"></div>
+
+                                <div class="form-group">
+                                    <label class="control-label col-xs-12 col-sm-3 no-padding-right" for="modal-form-edit-func">触发函数：</label>
+                                    <div class="col-xs-12 col-sm-9">
+                                        <div class="clearfix">
+                                            <select required class="chosen-select form-control" name="func" id="modal-form-edit-func">
+                                                <option></option>
+                                                <option value="avg">平均值</option>
+                                                <option value="last">实时值</option>
+                                                <option value="max">最大值</option>
+                                                <option value="min">最小值</option>
+                                                <option value="sum">总和</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="space-2"></div>
+
+                                <div class="form-group">
+                                    <label class="control-label col-xs-12 col-sm-3 no-padding-right" for="modal-form-edit-silent_from">静默时间：</label>
+                                    <div class="col-xs-12 col-sm-9">
+                                        <span>
+                                            <select name="silent_from" id="modal-form-edit-silent_from">
+                                                <option value="-1"></option>
+                                                {% for _ in 'x'|ljust:'24' %}
+                                                    <option value="{{ forloop.counter0 }}">{{ forloop.counter0 }}:00</option>
+                                                {% endfor %}
+                                            </select>
+                                        </span>
+                                        <span> ~ </span>
+                                        <span>
+                                            <select name="silent_to" id="modal-form-edit-silent_to">
+                                                <option value="-1"></option>
+                                                {% for _ in 'x'|ljust:'24' %}
+                                                    <option value="{{ forloop.counter0 }}">{{ forloop.counter0 }}:00</option>
+                                                {% endfor %}
+                                            </select>
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="space-2"></div>
+
+                                <div class="form-group">
+                                    <label class="control-label col-xs-12 col-sm-3 no-padding-right" for="modal-form-edit-state">状态：</label>
+                                    <div class="col-xs-12 col-sm-9">
+                                        <div class="clearfix">
+                                            <select class="chosen-select form-control" name="state" id="modal-form-edit-state">
+                                                <option value="0">启用告警</option>
+                                                <option value="1">禁用告警</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="space-2"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-sm btn-primary">
+                            <i class="ace-icon fa fa-check"></i>
+                            提交
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-item-hist" class="modal fade"><div class="modal-dialog"><div class="modal-content">
+        <div class="modal-header"><div class="table-header">
+            <button type="button" class="close" onclick="$('#modal-item-hist').modal('hide');">&times;</button>
+            <h4 class="blue bigger" id="modal-item-hist-title"></h4>
+        </div></div>
+        <div class="modal-body no-padding">
+            <table class="table table-striped table-bordered table-hover no-margin-bottom no-border-top">
+                <thead><tr>
+                    <th>TimeStamp</th>
+                    <th>Value</th>
+                    <th>State</th>
+                </tr></thead>
+                <tbody id="modal-item-hist-body"></tbody>
+            </table>
+        </div>
+    </div></div></div>
+
+    <div id="modal-loading" class="modal" tabindex="-1">
+        <div class="spinner">
+            <div class="rect1"></div>
+            <div class="rect2"></div>
+            <div class="rect3"></div>
+            <div class="rect4"></div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block self_footer_js %}
+    <script src="/static/alert/bootbox.js"></script>
+    <script src="/static/alert/jquery.validate.min.js"></script>
+    <script src="/static/alert/chosen.jquery.min.js"></script>
+    <script src="/static/alert/select2.min.js"></script>
+    <script type="text/javascript">
+        function histModal(item_id, name){
+          $.ajax({
+            url: "/alert/items/history/?item_id="+item_id,
+            type: "GET"
+          }).done(function(result){
+              $('#modal-item-hist-title').html(name);
+              $('#modal-item-hist-body').html(result.body);
+              $('#modal-item-hist').modal('show');
+          })
+        }
+        function addModal(){
+            $('#modal-form').modal('show');
+        }
+        function editModal(item_id, name, ref, key, state, expr, interval, func, silent_from, silent_to){
+            var eee=expr.match(/(<|<=|>|>=|==|!=|>>>)\s*(\d+)\s*/), exprLogic, exprThreshold;
+            if(eee){exprLogic=eee[1];exprThreshold=eee[2];}
+            else{exprLogic='>>>';exprThreshold=expr;}
+
+            $('#modal-form-edit-expr-threshold').val(exprThreshold);
+            $('#modal-form-edit-expr-logic').find('option[value="'+exprLogic+'"]').prop('selected', true).trigger('chosen:updated');
+            if(exprLogic==='>>>'){$('#modal-form-edit-ratio-mark').show()}
+
+            $('#modal-form-edit-id').val(item_id);
+            $('#modal-form-edit-name').val(name);
+            $('#modal-form-edit-key').val(key);
+            $('#modal-form-edit-ref').find('option[value='+ref+']').prop('selected', true).trigger('chosen:updated');
+            $('#modal-form-edit-state').find('option[value='+state+']').prop('selected', true).trigger('chosen:updated');
+            $('#modal-form-edit-interval').val(interval);
+            $('#modal-form-edit-func').find('option[value="'+func+'"]').prop('selected', true).trigger('chosen:updated');
+            $('#modal-form-edit-silent_from').find('option[value="'+silent_from+'"]').prop('selected', true).trigger('chosen:updated');
+            $('#modal-form-edit-silent_to').find('option[value="'+silent_to+'"]').prop('selected', true).trigger('chosen:updated');
+            $('#modal-form-edit').modal('show');
+        }
+        function addProject(form) {
+            $('#modal-loading').modal('show');
+            var exprLogic=$('#modal-form-expr-logic').val(), exprThreshold=$('#modal-form-expr-threshold').val();
+            var fd=new FormData(form);
+            fd.append('pid', '{{ pid }}');
+            if(exprLogic==='>>>'){fd.append('expr', exprThreshold);fd.append('state_ratio', '0');}
+            else{fd.append('expr', exprLogic+exprThreshold);fd.append('state_ratio', '1');}
+            $.ajax({
+                url: "/alert/items/add/",
+                type: "POST",
+                data: fd,
+                enctype: "multipart/form-data",
+                processData: false,
+                contentType: false
+            }).done(function (result) {
+                bootbox.alert(result.errmsg, function(){
+                    if (result.errcode === 0) {window.location.reload();}
+                    else $('#modal-loading').modal('hide');
+                });
+            });
+            return false;
+        }
+        function editProject(form) {
+            $('#modal-loading').modal('show');
+            var exprLogic=$('#modal-form-edit-expr-logic').val(), exprThreshold=$('#modal-form-edit-expr-threshold').val();
+            var fd=new FormData(form);
+            if(exprLogic==='>>>'){fd.append('expr', exprThreshold);fd.append('state_ratio', '0');}
+            else{fd.append('expr', exprLogic+exprThreshold);fd.append('state_ratio', '1');}
+            var item_id=$('#modal-form-edit-id').val();
+            $.ajax({
+                url: "/alert/items/edit/?item_id="+item_id,
+                type: "POST",
+                data: fd,
+                enctype: "multipart/form-data",
+                processData: false,
+                contentType: false
+            }).done(function (result) {
+                bootbox.alert(result.errmsg, function(){
+                    if (result.errcode === 0) {window.location.reload();}
+                    else $('#modal-loading').modal('hide');
+                });
+            });
+            return false;
+        }
+        {% if request.user.is_superuser %}
+        function removeProject(item_id, item_name) {
+            bootbox.confirm('是否删除监控项: '+item_name+' ？', function(result){
+              if (result){
+                $.ajax({
+                    url: "/alert/items/remove/?item_id="+item_id,
+                    type: "DELETE"
+                }).done(function (result) {
+                    bootbox.alert(result.errmsg, function(){
+                        if (result.errcode === 0) {window.location.reload();}
+                    });
+                });
+              }
+            });
+        }
+        {% endif %}
+        function selectRatio(val){
+            if(val==='>>>'){
+                $('#modal-form-ratio-mark').show();
+                $('#modal-form-interval').val('3600').closest('div.form-group').hide();
+                $('#modal-form-func option[value="last"]').attr('disabled', true);
+            } else{
+                $('#modal-form-ratio-mark').hide();
+                $('#modal-form-interval').val('60').closest('div.form-group').show();
+                $('#modal-form-func option[value="last"]').attr('disabled', false);
+            }
+        }
+        function selectRatioEdit(val){
+            if(val==='>>>'){
+                $('#modal-form-edit-ratio-mark').show();
+                $('#modal-form-edit-interval').val('3600').closest('div.form-group').hide();
+                $('#modal-form-edit-func option[value="last"]').attr('disabled', true);
+            } else{
+                $('#modal-form-edit-ratio-mark').hide();
+                $('#modal-form-edit-interval').val('60').closest('div.form-group').show();
+                $('#modal-form-edit-func option[value="last"]').attr('disabled', false);
+            }
+        }
+
+        jQuery(function($) {
+            $('#modal-form form.form-horizontal').validate({
+                errorElement: 'div',
+                errorClass: 'help-block',
+                focusInvalid: false,
+                ignore: '',
+                highlight: function(e) {
+                    $(e).closest('.form-group').removeClass('has-info').addClass('has-error');
+                },
+                success: function(e) {
+                    $(e).closest('.form-group').removeClass('has-error');
+                    $(e).remove();
+                },
+                errorPlacement: function(error, element) {
+                    if (element.is('input[type=checkbox]') || element.is('input[type=radio]')) {
+                        var controls = element.closest('div[class*="col-"]');
+                        if (controls.find(':checkbox,:radio').length > 1) controls.append(error);
+                        else error.insertAfter(element.nextAll('.lbl:eq(0)').eq(0));
+                    } else if (element.is('.select2')) {
+                        error.insertAfter(element.siblings('[class*="select2-container"]:eq(0)'));
+                    } else if (element.is('.chosen-select')) {
+                        error.insertAfter(element.siblings('[class*="chosen-container"]:eq(0)'));
+                    } else {
+                        error.insertAfter(element.parent());
+                    }
+                },
+                submitHandler: function(form) {
+                    addProject(form);
+                },
+                invalidHandler: function(form) {
+                }
+            });
+            $('#modal-form-edit form.form-horizontal').validate({
+                errorElement: 'div',
+                errorClass: 'help-block',
+                focusInvalid: false,
+                ignore: '',
+                highlight: function(e) {
+                    $(e).closest('.form-group').removeClass('has-info').addClass('has-error');
+                },
+                success: function(e) {
+                    $(e).closest('.form-group').removeClass('has-error');
+                    $(e).remove();
+                },
+                errorPlacement: function(error, element) {
+                    if (element.is('input[type=checkbox]') || element.is('input[type=radio]')) {
+                        var controls = element.closest('div[class*="col-"]');
+                        if (controls.find(':checkbox,:radio').length > 1) controls.append(error);
+                        else error.insertAfter(element.nextAll('.lbl:eq(0)').eq(0));
+                    } else if (element.is('.select2')) {
+                        error.insertAfter(element.siblings('[class*="select2-container"]:eq(0)'));
+                    } else if (element.is('.chosen-select')) {
+                        error.insertAfter(element.siblings('[class*="chosen-container"]:eq(0)'));
+                    } else {
+                        error.insertAfter(element.parent());
+                    }
+                },
+                submitHandler: function(form) {
+                    editProject(form);
+                },
+                invalidHandler: function(form) {
+                }
+            });
+        })
+    </script>
+{% endblock %}

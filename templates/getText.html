@@ -1,0 +1,36 @@
+
+{% extends 'base.html' %}
+{% block content %}
+
+
+ <body>
+   <h1>Result:</h1>
+   <p id="fileName" value="{{ fileName }}"></p>
+   <div id="content" style="height:500px;overflow:auto;"></div>
+ </body>
+
+    <script>
+        id = 1
+        var filename = document.querySelector('#fileName').getAttribute('value')
+   		$(document).ready(function() {
+   			flush_data = setInterval(function() {
+
+                $.getJSON("/asset/getText/",{"fileName":filename},function(data) {
+            		    $("#content").html('<pre style="border: none">' + data.info + '</pre>');
+                        console.log(id)
+                        id = id + 1
+                        if (data.end == 'done' || data.end == 'error') {
+                            console.log('stop')
+                            window.clearInterval(flush_data)
+                        }
+                        if (data.info == '' && id == 20){
+                           alert('celery is error,please try again.')
+                           window.clearInterval(flush_data)
+                        }
+                    });
+   		    }, 3000)
+        })
+   </script>
+
+{% endblock %}
+

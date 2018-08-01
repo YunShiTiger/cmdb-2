@@ -1,0 +1,219 @@
+{% extends 'base.html' %}
+{% include 'link_css.html' %}
+{% block self_head_css_js %}
+    {#    <link href="/static/alert/chosen.min.css" rel="stylesheet">#}
+    <link href="/static/css/new_style.css" rel="stylesheet">
+    <link href="/static/alert/select2.min.css" rel="stylesheet">
+    <link href="/static/css/plugins/timepicker/bootstrap-timepicker.min.css" rel="stylesheet">
+    <link href="/static/css/plugins/datepicker/datepicker3.css" rel="stylesheet">
+{% endblock %}
+{% block self_footer_js %}
+    {#    <script src="/static/alert/chosen.jquery.min.js"></script>#}
+    <script src="/static/alert/select2.min.js"></script>
+    <script src="/static/js/timepicker/bootstrap-timepicker.js"></script>
+    <script src="/static/js/datapicker/bootstrap-datepicker.js"></script>
+{% endblock %}
+{% block content %}
+    <p class="text-center"><a target="_blank"
+           href="https://www.tapd.cn/20257541/markdown_wikis/view/#1120257541001011545"
+           class="center-block">帮助文档</a></p>
+    <div class="tabs-container">
+        <ul class="nav nav-tabs">
+            <li id="projectInfo" class="active"><a href="/asset/project/init/list/">项目初始化</a></li>
+            <li id="approvalLevelList" class=""><a href="/asset/project/level/list/">审批级别</a></li>
+            <li id="initTemplate" class="" style="display: none"><a href="/asset/project/template/list/">通用模板</a></li>
+            <li id="publishSheet" class=""><a href="/asset/project/publishsheet/list/">发布单</a></li>
+            <li id="createTab" class="" style="display: none"><a data-toggle="tab" href="#tab-3">创建发布单</a></li>
+            <li id="doneSheet" class=""><a href="/asset/project/publishsheet/list/done/">完成&作废</a></li>
+            <li id="publishResult" class="" style="display: none"><a href=#>发布结果</a>
+            </li>
+        </ul>
+        <div class="tab-content">
+            <div id="tab-1" class="tab-pane active">
+                <div class="wrapper wrapper-content animated fadeInRight">
+                    <div class="row">
+                        <div class="col-lg-6">
+                            <div class="ibox">
+                                <div class="ibox-content">
+                                    <div class="text-center">
+                                        <h3>项目初始化</h3>
+                                        <p class="small"><i class="fa fa-cog"></i> 配置项目的基本信息</p>
+                                    </div>
+
+                                    <form role="form" id="init_form">
+                                        <div class="form-group">
+                                            <span style="color: red;">*</span><label>&nbsp;项目</label>
+                                            <select class="form-control" id="project_select" multiple="multiple"
+                                                    data-live-search="true">
+                                                {% for gogroup in gogroup_objs %}
+                                                    <option value={{ gogroup.id }}>{{ gogroup.name }}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <span style="color: red;">*</span><label>&nbsp;负责人</label>
+                                            <select id="owner_select" multiple="multiple"
+                                                    class="form-control" data-live-search="true">
+                                                {% for gogroup in user_objs %}
+                                                    <option value={{ gogroup.id }}>{{ gogroup.username }}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>&nbsp;通知邮件组</label>
+                                            <select id="mailgroup_select" multiple="multiple"
+                                                    class="form-control" data-live-search="true">
+                                                {% for gogroup in mailgroup_objs %}
+                                                    <option value={{ gogroup.id }}>{{ gogroup.email }}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>&nbsp;一级审批人</label>
+                                            <select id="first_select" multiple="multiple"
+                                                    class="form-control" data-live-search="true">
+                                                {% for user in approver_objs %}
+                                                    <option value={{ user.id }}>{{ user.approver.username }}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>&nbsp;二级审批人</label>
+                                            <select id="second_select" multiple="multiple"
+                                                    class="form-control" data-live-search="true">
+                                                {% for user in approver_objs %}
+                                                    <option value={{ user.id }}>{{ user.approver.username }}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+
+
+                                        <br>
+
+                                        <div class="text-center">
+                                            <button class="btn btn-sm btn-primary m-t-n-xs" type="submit"
+                                                    id="create_projectinfo">初始化
+                                            </button>
+                                        </div>
+                                    </form>
+
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-6">
+                            <div class="ibox">
+                                <div class="ibox-content">
+                                    <div class="text-center">
+                                        <h3>项目信息列表</h3>
+                                        <p class="small"><i class="fa fa-folder-open"></i> 已存在的项目初始化信息列表</p>
+                                    </div>
+                                    <ul class="sortable-list connectList agile-list ui-sortable"
+                                        id="inprogress">
+                                        {% for projectinfo in project_list %}
+                                            <li class="success-element" id="{{ projectinfo.project_id }}">
+                                                <p>项目： {{ projectinfo.project_name }} <a class="close-li pull-right"
+                                                                                         style="color: #c4c4c4"
+                                                                                         href="javascript: void(0);"
+                                                                                         data-toggle="modal"
+                                                                                         data-target="#deleteProjectModal_{{ projectinfo.project_id }}"><i
+                                                        class="fa fa-times"></i></a></p>
+                                                <p>负责人：
+                                                    {% for owner in projectinfo.owner_list %}
+                                                        {{ owner }}&nbsp;
+                                                    {% endfor %}
+                                                </p>
+                                                <p>通知邮件组：
+                                                    {% if projectinfo.mailgroup_list %}
+                                                        {% for mailgroup in projectinfo.mailgroup_list %}
+                                                            {{ mailgroup }}&nbsp;
+                                                        {% endfor %}
+                                                    {% endif %}
+                                                </p>
+
+                                                {% if projectinfo.first_list %}
+                                                    <p>一级审批人：
+                                                        {% for first in projectinfo.first_list %}
+                                                            {{ first }}&nbsp;
+                                                        {% endfor %}
+                                                    </p>
+                                                {% endif %}
+                                                {% if projectinfo.second_list %}
+                                                    <p>二级审批人：
+                                                        {% for second in projectinfo.second_list %}
+                                                            {{ second }}&nbsp;
+                                                        {% endfor %}
+                                                    </p>
+                                                {% endif %}
+                                                <p>创建人：
+                                                    {{ projectinfo.creator }}
+                                                </p>
+                                            </li>
+                                            <div class="modal inmodal fade"
+                                                 id="deleteProjectModal_{{ projectinfo.project_id }}" tabindex="-1"
+                                                 role="dialog"
+                                                 aria-labelledby="addModalLabel"
+                                                 aria-hidden="true">
+                                                <div class="modal-dialog modal-lg">
+                                                    <div class="modal-content">
+                                                        <div class="modal-header">
+                                                            <button type="button" class="close"
+                                                                    data-dismiss="modal"><span
+                                                                    aria-hidden="true">×</span><span
+                                                                    class="sr-only">Close</span></button>
+                                                            <i class="fa fa-times modal-icon"
+                                                               style="color: red"></i>
+                                                            <h4 class="modal-title" id="minion_old">确认删除</h4>
+                                                        </div>
+                                                        <div class="modal-footer">
+                                                            <button type="button" class="btn btn-white"
+                                                                    data-dismiss="modal">关闭
+                                                            </button>
+                                                            <button type="button" class="btn btn-danger"
+                                                                    data-dismiss="modal"
+                                                                    id="deleteProjectButton"
+                                                                    onclick="delete_projectinfo('{{ projectinfo.project_id }}')">
+                                                                删除
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        {% endfor %}
+                                    </ul>
+                                    <ul class="pager">
+                                        {% if project_list.has_previous %}
+                                            <li>
+                                                <a href="?page={{ project_list.previous_page_number }}">Previous</a>
+                                            </li>
+                                        {% endif %}
+                                        <li>Page {{ project_list.number }}
+                                            of {{ project_list.paginator.num_pages }}.
+                                        </li>
+                                        {% if project_list.has_next %}
+                                            <li><a href="?page={{ project_list.next_page_number }}">Next</a></li>
+                                        {% endif %}
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+
+        </div>
+    </div>
+
+    <script src="/static/js/custom/gogroup_init.js"></script>
+
+    <style>
+        input:-webkit-autofill {
+            -webkit-box-shadow: 0 0 0px 1000px white inset;
+            border: 1px solid #CCC !important;
+        }
+
+    </style>
+
+{% endblock %}

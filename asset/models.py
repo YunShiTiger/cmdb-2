@@ -2,6 +2,8 @@
 
 import datetime
 from django.db import models
+from django.contrib.auth.models import User
+
 
 
 ASSET_ENV = (
@@ -25,6 +27,11 @@ ASSET_TYPE = (
     (7, u"其他")
     )
 
+
+class gogroup(models.Model):
+    name = models.CharField(max_length=32,verbose_name=u"go group name",unique=True)
+    def __unicode__(self):
+        return self.name
 
 class AssetGroup(models.Model):
     GROUP_TYPE = (
@@ -61,7 +68,7 @@ class Asset(models.Model):
     """
     asset modle
     """
-    ip = models.CharField(max_length=32, blank=True, null=True, verbose_name=u"主机IP")
+    ip = models.CharField(max_length=8192, blank=True, null=True, verbose_name=u"主机IP")
     other_ip = models.CharField(max_length=255, blank=True, null=True, verbose_name=u"其他IP")
     hostname = models.CharField(unique=True, max_length=128, verbose_name=u"主机名")
     port = models.IntegerField(blank=True, null=True, verbose_name=u"端口号")
@@ -83,12 +90,13 @@ class Asset(models.Model):
     position = models.IntegerField(blank=True, null=True, verbose_name=u'机器位置')
     number = models.CharField(max_length=32, blank=True, null=True, verbose_name=u'资产编号')
     status = models.IntegerField(choices=ASSET_STATUS, blank=True, null=True, default=1, verbose_name=u"机器状态")
-    asset_type = models.IntegerField(choices=ASSET_TYPE, blank=True, null=True, verbose_name=u"主机类型")
+    asset_type = models.CharField(max_length=32, blank=True, null=True, verbose_name=u"主机类型")
     env = models.IntegerField(choices=ASSET_ENV, blank=True, null=True, verbose_name=u"运行环境")
     sn = models.CharField(max_length=128, blank=True, null=True, verbose_name=u"SN编号")
     date_added = models.DateTimeField(auto_now=True, null=True)
     is_active = models.BooleanField(default=True, verbose_name=u"是否激活")
     comment = models.CharField(max_length=128, blank=True, null=True, verbose_name=u"备注")
+    wan_ip = models.CharField(max_length=8192, blank=True, null=True, verbose_name=u"外网IP")
 
     def __unicode__(self):
         return self.ip
@@ -102,16 +110,121 @@ class AssetRecord(models.Model):
     comment = models.TextField(null=True, blank=True)
 
 
-class spike(models.Model):
-    name = models.CharField(max_length=32, verbose_name=u'spike services name')
+class minion(models.Model):
+    saltname = models.CharField(max_length=32, verbose_name=u'salt minion name')
+    ip = models.GenericIPAddressField()
+
+    def __unicode__(self):
+        return self.saltname
+
+
+class cron_minion(models.Model):
+    name = models.CharField(max_length=32, verbose_name=u'alias name show to users', blank=True, null=True)
+    saltminion = models.ForeignKey(minion)
 
     def __unicode__(self):
         return self.name
 
 
-class account(models.Model):
-    name = models.CharField(max_length=32, verbose_name=u'account services name')
+class goservices(models.Model):
+    ip = models.GenericIPAddressField()
+    name = models.CharField(max_length=128, verbose_name=u'goservices services name')
+    env = models.IntegerField(choices=ASSET_ENV, blank=True, null=True, verbose_name=u"运行环境")
+    group = models.ForeignKey(gogroup)
+    saltminion = models.ForeignKey(minion)
+    owner = models.CharField(max_length=32)
+    comment = models.CharField(max_length=256)
+    has_statsd = models.CharField(max_length=256)
+    has_sentry = models.CharField(max_length=256)
+    ports = models.CharField(max_length=128, null=True, verbose_name=u'ports')
+    level = models.CharField(max_length=128, null=True, verbose_name=u'level')
+    def __unicode__(self):
+        return self.name
+
+class svn(models.Model):
+    username = models.CharField(max_length=32)
+    password = models.CharField(max_length=32)
+    repo = models.CharField(max_length=128)
+    localpath = models.CharField(max_length=64)
+    movepath = models.CharField(max_length=64)
+    revertpath = models.CharField(max_length=64)
+    executefile = models.CharField(max_length=64)
+    project = models.ForeignKey(gogroup)
+
+    def __unicode__(self):
+        return self.repo
+
+
+class GoServiceRevision(models.Model):
+    name = models.CharField(max_length=128, verbose_name=u'Go Service name')
+    last_rev = models.IntegerField(verbose_name=u"goproject latest successful revision")
+    gotemplate_last_rev =  models.IntegerField(verbose_name=u"gotemplate latest successful revision")
+    last_clock = models.IntegerField(verbose_name=u"latest successful timestamp")
 
     def __unicode__(self):
         return self.name
 
+# class GoTemplateRevision(models.Model):
+#     name = models.CharField(max_length=128, verbose_name=u'Go Project')
+#     last_rev = models.IntegerField(verbose_name=u"latest successful revision")
+#     last_clock = models.IntegerField(verbose_name=u"latest successful timestamp")
+#
+#     def __unicode__(self):
+#         return self.name
+
+
+class goconf(models.Model):
+    username = models.CharField(max_length=32)
+    password = models.CharField(max_length=32)
+    repo = models.CharField(max_length=128)
+    localpath = models.CharField(max_length=64)
+    env = models.IntegerField(choices=ASSET_ENV, blank=True, null=True, verbose_name=u"运行环境")
+    project = models.ForeignKey(gogroup)
+    hostname = models.ForeignKey(minion)
+
+    def __unicode__(self):
+        return self.repo
+
+
+class gobuild(models.Model):
+    env = models.IntegerField(choices=ASSET_ENV, blank=True, null=True, verbose_name=u"运行环境")
+    hostname = models.ForeignKey(minion)
+
+
+class gostatus(models.Model):
+    hostname = models.ForeignKey(minion)
+    supervisor_host = models.CharField(max_length=128,default='192.168.1.1')
+    supervisor_username = models.CharField(max_length=64)
+    supervisor_password = models.CharField(max_length=64)
+    supervisor_port = models.CharField(max_length=128,default='9001')
+
+    def __unicode__(self):
+        return self.supervisor_host
+
+class crontab_svn(models.Model):
+    hostname = models.ForeignKey(minion,blank=True,null=True)
+    minion_hostname = models.ForeignKey(cron_minion,blank=True,null=True)
+    username = models.CharField(max_length=32)
+    password = models.CharField(max_length=32)
+    repo = models.CharField(max_length=128,default="http://svn.abc.com/svn/test")
+    localpath = models.CharField(max_length=64,default='/srv/testsvn')
+    project = models.CharField(max_length=64)
+
+    def __unicode__(self):
+        return self.project
+
+class GOTemplate(models.Model):
+    username = models.CharField(max_length=32)
+    password = models.CharField(max_length=32)
+    repo = models.CharField(max_length=128)
+    localpath = models.CharField(max_length=64)
+    env = models.IntegerField(choices=ASSET_ENV, blank=True, null=True, verbose_name=u"运行环境")
+    project = models.ForeignKey(gogroup)
+    hostname = models.ForeignKey(minion)
+
+    def __unicode__(self):
+        return self.repo
+
+class UserProfile(models.Model):
+    phone_number = models.CharField(max_length=11)
+    user = models.OneToOneField(User)
