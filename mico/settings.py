@@ -54,13 +54,14 @@ INSTALLED_APPS = [
     'consul_kv',
     'disque',
     'project_crontab',
+    'publish',
 ]
 
 MIDDLEWARE_CLASSES = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
-    #'django.middleware.csrf.CsrfViewMiddleware',
+    # 'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
@@ -104,6 +105,9 @@ DATABASES = {
         'PASSWORD': '123456',
         'HOST': '127.0.0.1',
         'PORT': '3306',
+        'OPTIONS': {
+            "init_command": "SET foreign_key_checks = 0;",
+        }
     }
 }
 
@@ -113,19 +117,19 @@ DATABASES = {
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME':
-        'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+            'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
     },
     {
         'NAME':
-        'django.contrib.auth.password_validation.MinimumLengthValidator',
+            'django.contrib.auth.password_validation.MinimumLengthValidator',
     },
     {
         'NAME':
-        'django.contrib.auth.password_validation.CommonPasswordValidator',
+            'django.contrib.auth.password_validation.CommonPasswordValidator',
     },
     {
         'NAME':
-        'django.contrib.auth.password_validation.NumericPasswordValidator',
+            'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
 
@@ -147,9 +151,9 @@ USE_TZ = False
 
 STATIC_ROOT = '/django/static/'
 STATIC_URL = '/static/'
-STATICFILES_DIRS = (os.path.join(BASE_DIR, "static"), )
+STATICFILES_DIRS = (os.path.join(BASE_DIR, "static"),)
 
-#salt api info
+# salt api info
 salt_api_url = 'https://192.168.199.61:18080/'
 salt_api_url2 = 'https://192.168.199.61:18080/'
 salt_user = 'saltapis'
@@ -238,7 +242,6 @@ qingcloud_secretKey = '123456'
 cmd_host_aws = '127.0.0.1'
 cmd_host_qcd = '127.0.0.1'
 
-
 # consul_kv
 CONSUL_AGENT = {
     'hsg': '127.0.0.1',
@@ -251,3 +254,22 @@ ZABBIX_INFO = [
 ]
 GRAFANA_URL = 'https://<user>:<pass>@grafana.localhost'
 SENTRY_URL = 'https://sentry.localhost'
+
+# EMAIL_HOST = 'smtp.163.com'
+# EMAIL_PORT = '25'
+# EMAIL_HOST_USER = 'junkili@163.com'
+# EMAIL_HOST_PASSWORD = 'EzbuyBest1'
+# EMAIL_USER = 'junkili'
+# EMAIL_USE_TLS = True
+
+# CMDB_URL = 'http://127.0.0.1:8010/'
+
+EMAIL_HOST = 'smtp.exmail.qq.com'
+EMAIL_PORT = '465'
+EMAIL_HOST_USER = 'ezbuy_cmdb@ezbuy.com'
+EMAIL_HOST_PASSWORD = '3c964DA3a'
+# EMAIL_USER = 'ezbuy_cmdb@ezbuy.com'
+EMAIL_USE_SSL = True
+DEFAULT_FROM_EMAIL = 'ezbuy_cmdb@ezbuy.com'
+#
+CMDB_URL = 'http://192.168.199.61:8012/'
