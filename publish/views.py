@@ -470,7 +470,7 @@ def PublishSheetList(request):
         services_objs = publish.goservices.all()
         services_1 = services_objs[0]
         ser_list = services_objs.order_by('name').values_list('name', flat=True).distinct()
-        services_str = ', '.join(ser_list)
+        services_str = ', '.join(sorted(list(set(ser_list))))
         env = services_1.get_env_display()
         gogroup_obj = services_1.group
         level = publish.approval_level.get_name_display()
@@ -656,7 +656,8 @@ def PublishSheetDoneList(request):
     outtime_notapprove_list = []
     for publish in publishsheets:
         services_objs = publish.goservices.all().order_by('name')
-        services_str = ', '.join(services_objs.values_list('name', flat=True).distinct())
+        ser_list = services_objs.values_list('name', flat=True).distinct()
+        services_str = ', '.join(sorted(list(set(ser_list))))
         services_1 = services_objs[0]
         env = services_1.get_env_display()
         gogroup_obj = services_1.group
@@ -967,7 +968,7 @@ def createPublishSheet(request):
 
         subject = u'cmdb发布系统'
         ser_list = goservices_objs.order_by('name').values_list('name', flat=True).distinct()
-        services_str = ', '.join(ser_list)
+        services_str = ', '.join(sorted(list(set(ser_list))))
         env = goservices_objs[0].get_env_display()
         sheet_dict = {
             'services_str': services_str,
@@ -1093,7 +1094,8 @@ def ApproveList(request):
         else:
             approve_level = publish.approval_level.name
             services_objs = publish.goservices.all().order_by('name')
-            services_str = ', '.join(services_objs.values_list('name', flat=True).distinct())
+            ser_list = services_objs.values_list('name', flat=True).distinct()
+            services_str = ', '.join(sorted(list(set(ser_list))))
             services_1 = services_objs[0]
             env = services_1.get_env_display()
             gogroup_obj = services_1.group
@@ -1227,13 +1229,14 @@ def ApproveInit(request):
         tmp_dict = serialize_instance(publishsheet)
         service_objs = publishsheet.goservices.all()
         gogroup = service_objs[0].group
+        ser_list = service_objs.values_list('name', flat=True).distinct()
         try:
             publish_history = models.PublishApprovalHistory.objects.get(publish_sheet=publishsheet)
         except models.PublishApprovalHistory.DoesNotExist:
             # 从未审批过
             tmp_dict.update({
                 'group_name': gogroup.name,
-                'services': ', '.join(service_objs.values_list('name', flat=True).distinct()),
+                'services': ', '.join(sorted(list(set(ser_list)))),
                 'env': service_objs[0].get_env_display()
             })
         else:
@@ -1245,7 +1248,7 @@ def ApproveInit(request):
 
             tmp_dict.update({
                 'group_name': gogroup.name,
-                'services': ', '.join(service_objs.values_list('name', flat=True).distinct()),
+                'services': ', '.join(sorted(list(set(ser_list)))),
                 'env': service_objs[0].get_env_display(),
                 'first_approver': first_approver,
                 'first_approve_time': first_approve_time,
@@ -1459,7 +1462,7 @@ def PublishSheetDetail(request):
     else:
         services_objs = sheet_obj.goservices.all().order_by('name')
         service_list = services_objs.values_list('name', flat=True).distinct()
-        services_str = ', '.join(service_list)
+        services_str = ', '.join(sorted(list(set(service_list))))
         services_1 = services_objs[0]
         env = services_1.get_env_display()
         gogroup_obj = services_1.group
@@ -1564,6 +1567,7 @@ def StartPublish(request):
         goservices = publishsheet.goservices.all()
         goproject_name = goservices[0].group.name
         services = goservices.values_list('name', flat=True)
+        ser_list = sorted(list(set(services)))
         env = goservices[0].env
         tower_url = publishsheet.tapd_url
 
@@ -1572,8 +1576,8 @@ def StartPublish(request):
         Publish = asset_utils.goPublish(env)
 
         result = []
-        print '^^^^^^^^^^^^^^^^^^start to publish, services : ', services
-        for svc in services:
+        print '^^^^^^^^^^^^^^^^^^start to publish, ser_list : ', ser_list
+        for svc in ser_list:
             try:
                 rst = Publish.deployGo(goproject_name, svc, request.user.username, ip, tower_url, phone_number)
             except Exception as e:
