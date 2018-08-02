@@ -1458,7 +1458,8 @@ def PublishSheetDetail(request):
         print 'not exist'
     else:
         services_objs = sheet_obj.goservices.all().order_by('name')
-        services_str = ', '.join(services_objs.values_list('name', flat=True))
+        service_list = services_objs.values_list('name', flat=True).distinct()
+        services_str = ', '.join(service_list)
         services_1 = services_objs[0]
         env = services_1.get_env_display()
         gogroup_obj = services_1.group
