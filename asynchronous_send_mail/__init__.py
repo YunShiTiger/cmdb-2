@@ -1,6 +1,7 @@
 from django.core.mail import send_mail as core_send_mail
 from django.core.mail import EmailMultiAlternatives
 import threading
+from celery.task import task
 
 
 class EmailThread(threading.Thread):
@@ -22,6 +23,21 @@ class EmailThread(threading.Thread):
 
 
 def send_mail(subject, body, from_email, recipient_list, fail_silently=False, html=None, *args, **kwargs):
-    EmailThread(subject, body, from_email, recipient_list, fail_silently, html).start()
-            
+    _send.delay(subject, body, from_email, recipient_list, fail_silently=False, html=None)
+    #EmailThread(subject, body, from_email, recipient_list, fail_silently, html).start()
 
+
+@task
+def _send(subject, body, from_email, recipient_list, fail_silently=False, html=None):
+    for _ in range(3):
+        try:
+            msg = EmailMultiAlternatives(subject, body, from_email, recipient_list)
+            if html:
+                msg.attach_alternative(html, "text/html")
+            print 'recipient_list : ', recipient_list
+            msg.send(fail_silently)
+            print "_send mail success ..."
+            break
+        except Exception as e:
+            print "_send mail failed ..."
+            print str(e)
