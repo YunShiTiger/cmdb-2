@@ -17,6 +17,7 @@ class EmailThread(threading.Thread):
         msg = EmailMultiAlternatives(self.subject, self.body, self.from_email, self.recipient_list)
         if self.html:
             msg.attach_alternative(self.html, "text/html")
+        print 'self.recipient_list : ', self.recipient_list
         msg.send(self.fail_silently)
 
 

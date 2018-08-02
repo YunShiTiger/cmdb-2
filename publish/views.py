@@ -469,7 +469,7 @@ def PublishSheetList(request):
     for publish in publishsheets:
         services_objs = publish.goservices.all()
         services_1 = services_objs[0]
-        ser_list = services_objs.order_by('name').values_list('name', flat=True)
+        ser_list = services_objs.order_by('name').values_list('name', flat=True).distinct()
         services_str = ', '.join(ser_list)
         env = services_1.get_env_display()
         gogroup_obj = services_1.group
@@ -656,7 +656,7 @@ def PublishSheetDoneList(request):
     outtime_notapprove_list = []
     for publish in publishsheets:
         services_objs = publish.goservices.all().order_by('name')
-        services_str = ', '.join(services_objs.values_list('name', flat=True))
+        services_str = ', '.join(services_objs.values_list('name', flat=True).distinct())
         services_1 = services_objs[0]
         env = services_1.get_env_display()
         gogroup_obj = services_1.group
@@ -966,7 +966,7 @@ def createPublishSheet(request):
                 publishsheet_obj.reviewer.add(reviewer_obj)
 
         subject = u'cmdb发布系统'
-        ser_list = goservices_objs.order_by('name').values_list('name', flat=True)
+        ser_list = goservices_objs.order_by('name').values_list('name', flat=True).distinct()
         services_str = ', '.join(ser_list)
         env = goservices_objs[0].get_env_display()
         sheet_dict = {
@@ -1093,7 +1093,7 @@ def ApproveList(request):
         else:
             approve_level = publish.approval_level.name
             services_objs = publish.goservices.all().order_by('name')
-            services_str = ', '.join(services_objs.values_list('name', flat=True))
+            services_str = ', '.join(services_objs.values_list('name', flat=True).distinct())
             services_1 = services_objs[0]
             env = services_1.get_env_display()
             gogroup_obj = services_1.group
@@ -1233,7 +1233,7 @@ def ApproveInit(request):
             # 从未审批过
             tmp_dict.update({
                 'group_name': gogroup.name,
-                'services': ', '.join(service_objs.values_list('name', flat=True)),
+                'services': ', '.join(service_objs.values_list('name', flat=True).distinct()),
                 'env': service_objs[0].get_env_display()
             })
         else:
@@ -1245,7 +1245,7 @@ def ApproveInit(request):
 
             tmp_dict.update({
                 'group_name': gogroup.name,
-                'services': ', '.join(service_objs.values_list('name', flat=True)),
+                'services': ', '.join(service_objs.values_list('name', flat=True).distinct()),
                 'env': service_objs[0].get_env_display(),
                 'first_approver': first_approver,
                 'first_approve_time': first_approve_time,
@@ -1458,7 +1458,8 @@ def PublishSheetDetail(request):
         print 'not exist'
     else:
         services_objs = sheet_obj.goservices.all().order_by('name')
-        services_str = ', '.join(services_objs.values_list('name', flat=True))
+        service_list = services_objs.values_list('name', flat=True).distinct()
+        services_str = ', '.join(service_list)
         services_1 = services_objs[0]
         env = services_1.get_env_display()
         gogroup_obj = services_1.group
