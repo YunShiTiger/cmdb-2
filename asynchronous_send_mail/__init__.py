@@ -26,7 +26,7 @@ def send_mail(subject, body, from_email, recipient_list, fail_silently=False, ht
     print "subject: %s" % subject
     print "body: %s" % body
     print "html: %s" % html
-    _send.delay(subject, body, from_email, recipient_list, fail_silently=False, html=None)
+    _send.delay(subject, body, from_email, recipient_list, fail_silently=fail_silently, html=html)
     #EmailThread(subject, body, from_email, recipient_list, fail_silently, html).start()
 
 
