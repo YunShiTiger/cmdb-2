@@ -82,7 +82,7 @@
                                             <select id="second_select" multiple="multiple"
                                                     class="form-control" data-live-search="true">
                                                 {% for user in approver_objs %}
-                                                    <option value={{ user.id }}>{{ user.approver.username }}</option>
+                                                    <option value={{ user.approver.id }}>{{ user.approver.username }}</option>
                                                 {% endfor %}
                                             </select>
                                         </div>
