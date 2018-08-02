@@ -23,6 +23,9 @@ class EmailThread(threading.Thread):
 
 
 def send_mail(subject, body, from_email, recipient_list, fail_silently=False, html=None, *args, **kwargs):
+    print "subject: %s" % subject
+    print "body: %s" % body
+    print "html: %s" % html
     _send.delay(subject, body, from_email, recipient_list, fail_silently=False, html=None)
     #EmailThread(subject, body, from_email, recipient_list, fail_silently, html).start()
 
