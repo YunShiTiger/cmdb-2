@@ -25,7 +25,7 @@ def initProject(request):
     page = request.GET.get('page', 1)
     gogroup_objs = asset_models.gogroup.objects.all()
     mailgroup_objs = models.MailGroup.objects.all()
-    user_objs = User.objects.all()
+    user_objs = User.objects.filter(is_active=True)
     approver_objs = models.Approver.objects.all()
 
     project_list = []
@@ -779,7 +779,7 @@ def PublishSheetRefuseReason(request):
 @login_required()
 def createPublishSheetInit(request):
     gogroup_objs = asset_models.gogroup.objects.all()
-    user_objs = User.objects.all()
+    user_objs = User.objects.filter(is_active=True)
     return render(request, 'publish/publish_create.html', {'gogroup_objs': gogroup_objs, 'user_objs': user_objs})
 
 
